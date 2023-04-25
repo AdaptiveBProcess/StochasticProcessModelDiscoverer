@@ -4,13 +4,14 @@ Created on Fri Jun 26 13:27:58 2020
 
 @author: Manuel Camargo
 """
+import json
 import os
 import sys
 
 import click
 import yaml
+import pandas as pd
 
-from common import OUTPUT_FILES
 from common import SequencesGenerativeMethods as SqG
 from common import SplitMinerVersion as Sm
 
@@ -41,9 +42,9 @@ def main(file, update_gen, update_ia_gen, update_mpdf_gen, update_times_gen, sav
     params['gl']['evaluate'] = evaluate
     params['gl']['mining_alg'] = mining_alg
     params = read_properties(params)
-    params['gl']['sim_metric'] = 'tsd'  # Main metric
+    # params['gl']['sim_metric'] = 'tsd'  # Main metric
     # Additional metrics
-    params['gl']['add_metrics'] = ['day_hour_emd', 'log_mae', 'dl', 'mae']
+    # params['gl']['add_metrics'] = ['day_hour_emd', 'log_mae', 'dl', 'mae']
     params['gl']['exp_reps'] = exp_reps
     # Sequences generator
     params['s_gen'] = dict()
@@ -57,9 +58,17 @@ def main(file, update_gen, update_ia_gen, update_mpdf_gen, update_times_gen, sav
     params['s_gen']['gate_management'] = ['discovery', 'equiprobable']
 
     _ensure_locations(params)
+    _print_parameters(params)
 
     # simulator = ds.DeepSimulator(params)
     # simulator.execute_pipeline()
+
+
+def _print_parameters(params):
+    print("General parameters: ")
+    print(pd.read_json(json.dumps(params['gl']), orient='index').rename(columns={0: 'value'}))
+    print("Search space: ")
+    print(pd.read_json(json.dumps(params['s_gen']), orient='index').rename(columns={0: 'value'}))
 
 
 def read_properties(params):
@@ -75,11 +84,8 @@ def read_properties(params):
 
 
 def _ensure_locations(params):
-    for folder in ['event_logs_path', 'bpmn_models', 'embedded_path', 'ia_gen_path', 'times_gen_path']:
-        if not os.path.exists(params['gl'][folder]):
-            os.makedirs(params['gl'][folder])
-    if not os.path.exists(OUTPUT_FILES):
-        os.makedirs(OUTPUT_FILES)
+    if not os.path.exists(params['gl']['output_path']):
+        os.makedirs(params['gl']['output_path'])
 
 
 if __name__ == "__main__":
