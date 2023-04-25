@@ -23,17 +23,17 @@ import utils.support as sup
 from utils.support import timeit
 import readers.log_splitter as ls
 import readers.log_reader as lr
-from support_modules.writers import xes_writer as xes
-from support_modules.writers import xml_writer as xml
+import xes_writer as xes
+import xml_writer as xml
 import analyzers.sim_evaluator as sim
 
-import core_modules.sequences_generator.structure_miner as sm
-import core_modules.sequences_generator.structure_params_miner as spm
+import structure_miner as sm
+import structure_params_miner as spm
 from tqdm import tqdm
 import time
 
 
-class StructureOptimizer():
+class StructureOptimizer:
     """
     Hyperparameter-optimizer class
     """
@@ -64,6 +64,7 @@ class StructureOptimizer():
 
     def __init__(self, settings, log):
         """constructor"""
+        self.log_train = None
         self.space = self.define_search_space(settings)
         # Read inputs
         self.log = log
@@ -89,21 +90,13 @@ class StructureOptimizer():
 
     @staticmethod
     def define_search_space(settings):
-        var_dim = {'alg_manag': hp.choice('alg_manag', 
-                                          settings['alg_manag']),
-                   'gate_management': hp.choice('gate_management',
-                                                settings['gate_management'])}
+        var_dim = {'alg_manag': hp.choice('alg_manag', settings['alg_manag']),
+                   'gate_management': hp.choice('gate_management', settings['gate_management'])}
         if settings['mining_alg'] in ['sm1', 'sm3']:
-            var_dim['epsilon'] = hp.uniform('epsilon', 
-                                            settings['epsilon'][0],
-                                            settings['epsilon'][1])
-            var_dim['eta'] = hp.uniform('eta',
-                                              settings['eta'][0],
-                                              settings['eta'][1])
+            var_dim['epsilon'] = hp.uniform('epsilon', settings['epsilon'][0], settings['epsilon'][1])
+            var_dim['eta'] = hp.uniform('eta', settings['eta'][0], settings['eta'][1])
         elif settings['mining_alg'] == 'sm2':
-            var_dim['concurrency'] = hp.uniform('concurrency',
-                                                settings['concurrency'][0],
-                                                settings['concurrency'][1])
+            var_dim['concurrency'] = hp.uniform('concurrency', settings['concurrency'][0], settings['concurrency'][1])
         csettings = copy.deepcopy(settings)
         for key in var_dim.keys():
             csettings.pop(key, None) 
@@ -115,8 +108,8 @@ class StructureOptimizer():
             spm.StructureParametersMiner.mine_resources(
                 self.settings, self.log_train))
         self.log_train = copy.deepcopy(self.org_log_train)
+
         def exec_pipeline(trial_stg):
-            
             print('train split:', 
                   len(pd.DataFrame(self.log_train.data).caseid.unique()), 
                   ', valdn split:', 
@@ -127,22 +120,15 @@ class StructureOptimizer():
             exec_times = dict()
             sim_values = []
             # Path redefinition
-            rsp = self._temp_path_redef(trial_stg,
-                                        status=status,
-                                        log_time=exec_times)
+            rsp = self._temp_path_redef(trial_stg, status=status, log_time=exec_times)
             status = rsp['status']
             trial_stg = rsp['values'] if status == STATUS_OK else trial_stg
             # Structure mining
-            rsp = self._mine_structure(trial_stg,
-                                       status=status,
-                                       log_time=exec_times)
+            rsp = self._mine_structure(trial_stg, status=status, log_time=exec_times)
             status = rsp['status']
             # Parameters extraction
-            rsp = self._extract_parameters(trial_stg,
-                                           rsp['values'],
-                                           copy.deepcopy(parameters),
-                                           status=status,
-                                           log_time=exec_times)
+            rsp = self._extract_parameters(trial_stg, rsp['values'], copy.deepcopy(parameters),
+                                           status=status, log_time=exec_times)
             status = rsp['status']
             # Simulate model
             rsp = self._simulate(trial_stg,
