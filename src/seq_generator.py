@@ -1,29 +1,25 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Dec  8 14:45:36 2020
-
 @author: Manuel Camargo
 """
 import copy
 import itertools
-import json
 import os
 import shutil
 import subprocess
 from abc import ABCMeta, abstractmethod
-from datetime import datetime
 from operator import itemgetter
 from pathlib import Path
 from xml.dom import minidom
 
 import pandas as pd
+import readers.log_reader as lr
 import utils.support as sup
-from utils.support import safe_exec
 
 import structure_optimizer as so
-from common import FileExtensions as Fe
 from common import LogAttributes as La
 from common import SequencesGenerativeMethods as SqM
+from common import split_log
 
 
 class SeqGeneratorFabric:
@@ -43,13 +39,14 @@ class SeqGenerator(metaclass=ABCMeta):
     Generator base class
     """
 
-    def __init__(self, parameters, log_train):
+    def __init__(self, parameters):
         """constructor"""
         self.parameters = parameters
-        self.log_train = log_train
         self.is_safe = True
         self.model_metadata = dict()
         self.gen_seqs = None
+        self.log = None
+        self.model_path = None
 
     @abstractmethod
     def generate(self, num_inst, start_time):
@@ -58,6 +55,12 @@ class SeqGenerator(metaclass=ABCMeta):
     @abstractmethod
     def clean_time_stamps(self):
         pass
+
+    def _read_inputs(self, **_kwargs) -> None:
+        # Event log reading
+        self.log = lr.LogReader(self.parameters['file'], self.parameters['read_options'])
+        # Time splitting 80-20
+        self._split_timeline(0.8, self.parameters['read_options']['one_timestamp'])
 
     @staticmethod
     def sort_log(log):
@@ -73,18 +76,48 @@ class SeqGenerator(metaclass=ABCMeta):
         log.sort_values(by=La.START_TIME, ascending=True, inplace=True)
         return log
 
+    def _split_timeline(self, size: float, one_ts: bool) -> None:
+        """
+        Split an event log dataframe by time to perform split-validation.
+        preferred method time splitting removing incomplete traces.
+        If the testing set is smaller than the 10% of the log size
+        the second method is sort by traces start and split taking the whole
+        traces no matter if they are contained in the timeframe or not
+
+        Parameters
+        ----------
+        size : float, validation percentage.
+        one_ts : bool, Support only one timestamp.
+        """
+        key = 'end_timestamp' if one_ts else 'start_timestamp'
+        # Split log data
+        train, test = split_log(self.log, one_ts, size)
+        self.log_test = (test.sort_values(key, ascending=True).reset_index(drop=True))
+        print('Number of instances in test log: {}'.format(len(self.log_test[La.CASE_ID].drop_duplicates())))
+        self.log_train = copy.deepcopy(self.log)
+        self.log_train.set_data(train.sort_values(key, ascending=True).reset_index(drop=True).to_dict('records'))
+        print('Number of instances in train log: {}'.format(
+            len(train.sort_values(key, ascending=True).reset_index(drop=True)[La.CASE_ID].drop_duplicates())))
+
 
 class StochasticProcessModelGenerator(SeqGenerator):
 
-    def generate(self, log, start_time):
-        num_inst = len(log.caseid.unique())
-        # verify if model exists
-        self._verify_model()
+    def discover_model(self, search_space, s_gen_max_eval, exp_reps):
+        self._read_inputs()
+        structure_optimizer = so.StructureOptimizer(self.parameters, search_space, copy.deepcopy(self.log_train))
+        structure_optimizer.execute_trials(s_gen_max_eval, exp_reps)
+        # Print results
+        print(structure_optimizer.best_output, structure_optimizer.best_parms,
+              structure_optimizer.best_similarity, sep='\n')
+        # clean output folder
+        # shutil.rmtree(structure_optimizer.temp_output)
+
+    def generate(self, num_inst, start_time):
         # update model parameters
-        self._modify_simulation_model(self.model, num_inst, start_time)
+        self._modify_simulation_model(self.model_path, num_inst, start_time)
         temp_path = self._temp_path_creation()
         # generate instances
-        sim_log = self._execute_simulator(self.parameters['bimp_path'], temp_path, self.model)
+        sim_log = self._execute_simulator(self.parameters['bimp_path'], temp_path, self.model_path)
         # order by Case ID and add position in the trace
         sim_log = self._rename_sim_log(sim_log)
         # save traces
@@ -102,67 +135,6 @@ class StochasticProcessModelGenerator(SeqGenerator):
 
     def clean_time_stamps(self):
         self.gen_seqs.drop(columns=[La.START_TIME, La.END_TIME], inplace=True)
-
-    def _verify_model(self) -> None:
-        model_path = os.path.join(self.parameters['bpmn_models'], self.parameters['file'].split('.')[0] + Fe.BPMN)
-        if os.path.exists(model_path) and self.parameters['update_gen']:
-            self.is_safe = self._discover_model(True, is_safe=self.is_safe)
-        elif not os.path.exists(model_path):
-            self.is_safe = self._discover_model(False, is_safe=self.is_safe)
-        self.model = model_path
-
-    @safe_exec
-    def _discover_model(self, compare, **_kwargs):
-        structure_optimizer = so.StructureOptimizer(self.parameters, copy.deepcopy(self.log_train))
-        structure_optimizer.execute_trials()
-        struc_model = structure_optimizer.best_output
-        best_parameters = structure_optimizer.best_parms
-        best_similarity = structure_optimizer.best_similarity
-        metadata_file = os.path.join(self.parameters['bpmn_models'],
-                                     f"{self.parameters['file'].split('.')[0]}_meta{Fe.JSON}")
-        # compare with existing model
-        save = True
-        if compare:
-            # Loading of parameters from existing model
-            save = self._loading_parameters_from_existing_model(best_similarity, metadata_file, save)
-        if save:
-            # best structure mining parameters
-            self._extract_model_metadata(best_parameters, best_similarity)
-            # Copy best model to destination folder
-            self._copy_best_model(struc_model)
-            # Save metadata
-            sup.create_json(self.model_metadata, metadata_file)
-        # clean output folder
-        shutil.rmtree(structure_optimizer.temp_output)
-
-    def _copy_best_model(self, struc_model):
-        file_name = f"{self.parameters['file'].split('.')[0]}{Fe.BPMN}"
-        destination = os.path.join(self.parameters['bpmn_models'], file_name)
-        source = os.path.join(struc_model, file_name)
-        shutil.copyfile(source, destination)
-
-    def _extract_model_metadata(self, best_parameters, best_similarity):
-        self.model_metadata['alg_manag'] = (self.parameters['alg_manag'][best_parameters['alg_manag']])
-        self.model_metadata['gate_management'] = (self.parameters['gate_management'][best_parameters['gate_management']])
-        if self.parameters['mining_alg'] == 'sm1':
-            self.model_metadata['epsilon'] = best_parameters['epsilon']
-            self.model_metadata['eta'] = best_parameters['eta']
-        elif self.parameters['mining_alg'] == 'sm2':
-            self.model_metadata['concurrency'] = best_parameters['concurrency']
-        self.model_metadata['similarity'] = best_similarity
-        self.model_metadata['generated_at'] = (datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-
-    @staticmethod
-    def _loading_parameters_from_existing_model(best_similarity, metadata_file, save):
-        if os.path.exists(metadata_file):
-            with open(metadata_file) as file:
-                data = json.load(file)
-                data = {k: v for k, v in data.items()}
-                print(data['similarity'])
-            if data['similarity'] > best_similarity:
-                save = False
-                print('dont save')
-        return save
 
     @staticmethod
     def _temp_path_creation() -> Path:

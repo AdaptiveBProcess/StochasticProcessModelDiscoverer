@@ -50,7 +50,7 @@ class GatewaysEvaluator:
     @staticmethod
     def normalize_probabilities(nodes_list: pd.DataFrame) -> pd.DataFrame:
         temp_list = list()
-        for key, group in nodes_list.groupby(by=['gate']):
+        for key, group in nodes_list.groupby('gate'):
             probabilities = np.nan_to_num(np.array(group.prob.tolist())).tolist()
             probabilities = sup.round_preserve(probabilities, 1)
             probabilities = sup.avoid_zero_prob(probabilities)
@@ -110,9 +110,9 @@ class GatewaysEvaluator:
         executions = lambda x: self.process_graph.nodes[x['t_task']]['executions']
         nodes_list['executions'] = nodes_list.apply(executions, axis=1)
         # Aggregate path executions
-        nodes_list = (nodes_list.groupby(by=['gate', 't_path'])['executions'].sum().reset_index())
+        nodes_list = (nodes_list.groupby(['gate', 't_path'])['executions'].sum().reset_index())
         # Calculate probabilities
-        t_ocurrences = (nodes_list.groupby(by=['gate'])['executions'].sum().to_dict())
+        t_ocurrences = (nodes_list.groupby('gate')['executions'].sum().to_dict())
         with np.errstate(divide='ignore', invalid='ignore'):
             rate = lambda x: round(np.divide(x['executions'], t_ocurrences[x['gate']]), 2)
             nodes_list['prob'] = nodes_list.apply(rate, axis=1)
@@ -129,11 +129,11 @@ class GatewaysEvaluator:
         # Obtain gateways structure
         nodes_list = self.analyze_gateway_structure()
         # Aggregate paths
-        nodes_list = (nodes_list.groupby(by=['gate', 't_path']).count().reset_index())
+        nodes_list = (nodes_list.groupby(['gate', 't_path']).count().reset_index())
         nodes_list['prob'] = 0.0
         # assign random probabilities
         temp_list = list()
-        for key, group in nodes_list.groupby(by=['gate']):
+        for key, group in nodes_list.groupby('gate'):
             probabilities = np.random.dirichlet(np.ones(len(group)), size=1)[0]
             for i in range(0, len(probabilities)):
                 group.iat[i, 3] = round(probabilities[i], 2)
@@ -152,11 +152,11 @@ class GatewaysEvaluator:
         # Obtain gateways structure
         nodes_list = self.analyze_gateway_structure()
         # Aggregate paths
-        nodes_list = (nodes_list.groupby(by=['gate', 't_path']).count().reset_index())
+        nodes_list = (nodes_list.groupby(['gate', 't_path']).count().reset_index())
         nodes_list['prob'] = 0.0
         # assign probabilities
         temp_list = list()
-        for key, group in nodes_list.groupby(by=['gate']):
+        for key, group in nodes_list.groupby('gate'):
             p = 1 / len(group)
             probabilities = [p for i in range(0, len(group))]
             for i in range(0, len(probabilities)):

@@ -8,10 +8,13 @@ Read a csv file and convert that in xes file
 """
 import itertools as it
 import os
+
 import pandas as pd
-from opyenxes.factory.XFactory import XFactory
 from opyenxes.data_out.XesXmlSerializer import XesXmlSerializer
-from opyenxes.extension.std.XLifecycleExtension import XLifecycleExtension as xlc
+from opyenxes.extension.std.XLifecycleExtension import XLifecycleExtension as XlC
+from opyenxes.factory.XFactory import XFactory
+
+from common import FileExtensions as Fe
 
 
 class XesWriter(object):
@@ -24,9 +27,8 @@ class XesWriter(object):
         self.log = log.to_dict('records') if isinstance(log, pd.DataFrame) else log.data
         self.one_timestamp = settings['read_options']['one_timestamp']
         self.column_names = settings['read_options']['column_names']
-        self.output_file = os.path.join(settings['output'],
-                                        settings['file'].split('.')[0]+'.xes')
-
+        self.file_name = os.path.basename(settings['file']).split('.')[0]
+        self.output_file = os.path.join(settings['output'], self.file_name + Fe.XES)
         self.create_xes_file()
 
     def create_xes_file(self):
@@ -66,11 +68,11 @@ class XesWriter(object):
 
         """
         transitions = [{'column': 'Complete Timestamp',
-                        'value': xlc.StandardModel.COMPLETE,
+                        'value': XlC.StandardModel.COMPLETE,
                         'skiped': 'Start Timestamp'}]
         if not self.one_timestamp:
             transitions.insert(0,{'column': 'Start Timestamp',
-                                  'value': xlc.StandardModel.START,
+                                  'value': XlC.StandardModel.START,
                                   'skiped': 'Complete Timestamp'})
         # TODO: Add the use of extensions and optimize code
         events = list()
@@ -95,7 +97,7 @@ class XesWriter(object):
                         attribute2 = XFactory.create_attribute_literal(
                             'lifecycle:transition',
                             transition['value'],
-                            extension=xlc)
+                            extension=XlC)
                         attribute_map[attribute2.get_key()] = attribute2
                     elif attribute_type in ['Case ID',
                                             'Event ID', transition['skiped']]:

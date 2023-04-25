@@ -18,11 +18,10 @@ class TracesAligner(object):
     def __init__(self, log, not_conformant, settings):
         """constructor"""
         self.one_timestamp = settings['read_options']['one_timestamp']
-
+        self.file_name = os.path.basename(settings['file']).split('.')[0]
         self.evaluate_alignment(settings)
         self.optimal_alignments = self.read_alignment_info(settings['aligninfo'])
         self.traces_alignments = self.traces_alignment_type(settings['aligntype'])
-
         self.traces = list()
         self.get_traces(log, not_conformant)
 
@@ -214,7 +213,6 @@ class TracesAligner(object):
 
         """
         print(" -- Evaluating event log alignment --")
-        file_name = settings['file'].split('.')[0]
         args = ['java']
         if pl.system().lower() != 'windows':
             args.append('-Xmx2G')
@@ -222,8 +220,8 @@ class TracesAligner(object):
 
         args.extend(['-jar', settings['align_path'],
                      settings['output'] + os.sep,
-                     file_name + '.xes',
-                     settings['file'].split('.')[0] + '.bpmn',
+                     self.file_name + '.xes',
+                     self.file_name + '.bpmn',
                      'true'])
         subprocess.call(args, bufsize=-1)
 
@@ -280,7 +278,6 @@ class TracesAligner(object):
             [next(fp) for i in range(7)]
             for line in fp:
                 temp_record = line.split(',')
-                records.append(dict(caseid=temp_record[2],
-                                    trace_type=int(temp_record[1]),
-                                    fitness=float(temp_record[11])))
+                records.append(
+                    {'caseid': temp_record[2], 'trace_type': int(temp_record[1]), 'fitness': float(temp_record[11])})
         return records

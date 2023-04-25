@@ -30,6 +30,7 @@ import structure_miner as sm
 import structure_params_miner as spm
 import xes_writer as xes
 import xml_writer as xml
+from common import FileExtensions as Fe
 
 
 class StructureOptimizer:
@@ -64,10 +65,11 @@ class StructureOptimizer:
 
             return safety_check
 
-    def __init__(self, settings, log):
+    def __init__(self, settings, search_space, log):
         """constructor"""
         self.log_train = None
-        self.space = self.define_search_space(settings)
+        self.mining_alg = settings['mining_alg']
+        self.define_search_space(search_space)
         # Read inputs
         self.log = log
         self._split_timeline(0.8, settings['read_options']['one_timestamp'])
@@ -77,7 +79,7 @@ class StructureOptimizer:
         self.org_log_valdn = copy.deepcopy(self.log_valdn)
         # Load settings
         self.settings = settings
-        self.temp_output = os.path.join('output_files', sup.folder_id())
+        self.temp_output = os.path.join(settings['output_path'], sup.folder_id())
         if not os.path.exists(self.temp_output):
             os.makedirs(self.temp_output)
         self.file_name = os.path.join(self.temp_output, sup.file_id(prefix='OP_'))
@@ -90,33 +92,27 @@ class StructureOptimizer:
         self.best_parms = dict()
         self.best_similarity = 0
 
-    @staticmethod
-    def define_search_space(settings):
+    def define_search_space(self, settings):
         var_dim = {'alg_manag': hp.choice('alg_manag', settings['alg_manag']),
                    'gate_management': hp.choice('gate_management', settings['gate_management'])}
-        if settings['mining_alg'] in ['sm1', 'sm3']:
+        if self.mining_alg in ['sm1', 'sm3']:
             var_dim['epsilon'] = hp.uniform('epsilon', settings['epsilon'][0], settings['epsilon'][1])
             var_dim['eta'] = hp.uniform('eta', settings['eta'][0], settings['eta'][1])
-        elif settings['mining_alg'] == 'sm2':
+        elif self.mining_alg == 'sm2':
             var_dim['concurrency'] = hp.uniform('concurrency', settings['concurrency'][0], settings['concurrency'][1])
         csettings = copy.deepcopy(settings)
         for key in var_dim.keys():
             csettings.pop(key, None)
-        space = {**var_dim, **csettings}
-        return space
+        self.space = {**var_dim, **csettings}
 
-    def execute_trials(self):
-        parameters = (
-            spm.StructureParametersMiner.mine_resources(
-                self.settings, self.log_train))
+    def execute_trials(self, max_eval, exp_reps):
+        parameters = spm.StructureParametersMiner.mine_resources(self.settings, self.log_train)
         self.log_train = copy.deepcopy(self.org_log_train)
 
         def exec_pipeline(trial_stg):
-            print('train split:',
-                  len(pd.DataFrame(self.log_train.data).caseid.unique()),
-                  ', valdn split:',
-                  len(pd.DataFrame(self.log_valdn).caseid.unique()),
-                  sep=' ')
+            trial_stg = {**trial_stg, **self.settings}
+            print('train split:', len(pd.DataFrame(self.log_train.data).caseid.unique()),
+                  ', valdn split:', len(pd.DataFrame(self.log_valdn).caseid.unique()), sep=' ')
             # Vars initialization
             status = STATUS_OK
             exec_times = dict()
@@ -133,10 +129,7 @@ class StructureOptimizer:
                                            status=status, log_time=exec_times)
             status = rsp['status']
             # Simulate model
-            rsp = self._simulate(trial_stg,
-                                 self.log_valdn,
-                                 status=status,
-                                 log_time=exec_times)
+            rsp = self._simulate(trial_stg, exp_reps, self.log_valdn, status=status, log_time=exec_times)
             status = rsp['status']
             sim_values = rsp['values'] if status == STATUS_OK else sim_values
             # Save times
@@ -154,18 +147,15 @@ class StructureOptimizer:
         best = fmin(fn=exec_pipeline,
                     space=self.space,
                     algo=tpe.suggest,
-                    max_evals=self.settings['max_eval'],
+                    max_evals=max_eval,
                     trials=self.bayes_trials,
                     show_progressbar=False)
         # Save results
         try:
-            results = (pd.DataFrame(self.bayes_trials.results)
-                       .sort_values('loss', ascending=bool))
-            self.best_output = (results[results.status == 'ok']
-                                .head(1).iloc[0].output)
+            results = (pd.DataFrame(self.bayes_trials.results).sort_values('loss', ascending=True))
+            self.best_output = results[results.status == 'ok'].head(1).iloc[0].output
             self.best_parms = best
-            self.best_similarity = (results[results.status == 'ok']
-                                    .head(1).iloc[0].loss)
+            self.best_similarity = results[results.status == 'ok'].head(1).iloc[0].loss
         except Exception as e:
             print(e)
             pass
@@ -176,18 +166,14 @@ class StructureOptimizer:
         # Paths redefinition
         settings['output'] = os.path.join(self.temp_output, sup.folder_id())
         if settings['alg_manag'] == 'repair':
-            settings['aligninfo'] = os.path.join(
-                settings['output'],
-                'CaseTypeAlignmentResults.csv')
-            settings['aligntype'] = os.path.join(
-                settings['output'],
-                'AlignmentStatistics.csv')
+            settings['aligninfo'] = os.path.join(settings['output'], 'CaseTypeAlignmentResults.csv')
+            settings['aligntype'] = os.path.join(settings['output'], 'AlignmentStatistics.csv')
         # Output folder creation
         if not os.path.exists(settings['output']):
             os.makedirs(settings['output'])
             os.makedirs(os.path.join(settings['output'], 'sim_data'))
         # Create customized event-log for the external tools
-        xes.XesWriter(self.log_train, settings)
+        xes.XesWriter(self.log_train, {**self.settings, **settings})
         return settings
 
     @timeit(rec_name='MINING_STRUCTURE')
@@ -205,40 +191,33 @@ class StructureOptimizer:
     def _extract_parameters(self, settings, structure, parameters,
                             **kwargs) -> None:
         bpmn, process_graph = structure
-        p_extractor = spm.StructureParametersMiner(self.log_train,
-                                                   bpmn,
-                                                   process_graph,
-                                                   settings)
+        p_extractor = spm.StructureParametersMiner(self.log_train, bpmn, process_graph, settings)
         num_inst = len(self.log_valdn.caseid.unique())
         # Get minimum date
         start_time = (self.log_valdn
                       .start_timestamp
                       .min().strftime("%Y-%m-%dT%H:%M:%S.%f+00:00"))
-        p_extractor.extract_parameters(num_inst,
-                                       start_time,
-                                       parameters['resource_pool'])
+        p_extractor.extract_parameters(num_inst, start_time, parameters['resource_pool'])
         if p_extractor.is_safe:
             parameters = {**parameters, **p_extractor.parameters}
             # print parameters in xml bimp format
-            xml.print_parameters(os.path.join(
-                settings['output'],
-                settings['file'].split('.')[0] + '.bpmn'),
-                os.path.join(settings['output'],
-                             settings['file'].split('.')[0] + '.bpmn'),
+            file_name = os.path.basename(self.settings['file']).split('.')[0]
+            xml.print_parameters(
+                os.path.join(settings['output'], file_name + '.bpmn'),
+                os.path.join(settings['output'], file_name + '.bpmn'),
                 parameters)
 
             self.log_valdn.rename(columns={'user': 'resource'}, inplace=True)
             self.log_valdn['source'] = 'log'
             self.log_valdn['run_num'] = 0
             self.log_valdn['role'] = 'SYSTEM'
-            self.log_valdn = self.log_valdn[
-                ~self.log_valdn.task.isin(['Start', 'End'])]
+            self.log_valdn = self.log_valdn[~self.log_valdn.task.isin(['Start', 'End'])]
         else:
             raise RuntimeError('Parameters extraction error')
 
     @timeit(rec_name='SIMULATION_EVAL')
     @Decorators.safe_exec
-    def _simulate(self, settings, data, **kwargs) -> list:
+    def _simulate(self, settings, reps, data, **_kwargs) -> list:
 
         def pbar_async(p, msg):
             pbar = tqdm(total=reps, desc=msg)
@@ -254,7 +233,6 @@ class StructureOptimizer:
             p.wait()
             pbar.close()
 
-        reps = settings['repetitions']
         cpu_count = multiprocessing.cpu_count()
         w_count = reps if reps <= cpu_count else cpu_count
         pool = Pool(processes=w_count)
@@ -269,8 +247,7 @@ class StructureOptimizer:
         args = [(settings, data, log) for log in p.get()]
         if len(self.log_valdn.caseid.unique()) > 1000:
             pool.close()
-            results = [self.evaluate_logs(arg)
-                       for arg in tqdm(args, 'evaluating results:')]
+            results = [self.evaluate_logs(arg) for arg in tqdm(args, 'evaluating results:')]
             # Save results
             sim_values = list(itertools.chain(*results))
         else:
@@ -291,11 +268,12 @@ class StructureOptimizer:
             """
             m_settings = dict()
             m_settings['output'] = settings['output']
-            m_settings['file'] = settings['file']
+            m_settings['file'] = os.path.basename(settings['file'])
             column_names = {'resource': 'user'}
             m_settings['read_options'] = settings['read_options']
             m_settings['read_options']['timeformat'] = '%Y-%m-%d %H:%M:%S.%f'
             m_settings['read_options']['column_names'] = column_names
+
             temp = lr.LogReader(os.path.join(
                 m_settings['output'], 'sim_data',
                 m_settings['file'].split('.')[0] + '_' + str(rep + 1) + '.csv'),
@@ -340,14 +318,12 @@ class StructureOptimizer:
                 settings (dict): Path to jar and file names
                 rep (int): repetition number
             """
-            args = ['java', '-jar', settings['bimp_path'],
-                    os.path.join(settings['output'],
-                                 settings['file'].split('.')[0] + '.bpmn'),
-                    '-csv',
-                    os.path.join(settings['output'], 'sim_data',
-                                 settings['file']
-                                 .split('.')[0] + '_' + str(rep + 1) + '.csv')]
-            subprocess.run(args, check=True, stdout=subprocess.PIPE)
+            file_name = os.path.basename(settings['file']).split('.')[0]
+            arguments = ['java', '-jar', settings['bimp_path'],
+                         os.path.join(settings['output'], f'{file_name}{Fe.BPMN}'),
+                         '-csv',
+                         os.path.join(settings['output'], 'sim_data', f'{file_name}_{rep + 1}{Fe.CSV}')]
+            subprocess.run(arguments, check=True, stdout=subprocess.PIPE)
 
         sim_call(*args)
 
@@ -370,10 +346,10 @@ class StructureOptimizer:
                 'gate_management': settings['gate_management'],
                 'output': settings['output']}
         # Miner params
-        if settings['mining_alg'] in ['sm1', 'sm3']:
+        if self.mining_alg in ['sm1', 'sm3']:
             data['epsilon'] = settings['epsilon']
             data['eta'] = settings['eta']
-        elif settings['mining_alg'] == 'sm2':
+        elif self.mining_alg == 'sm2':
             data['concurrency'] = settings['concurrency']
         else:
             raise ValueError(settings['mining_alg'])
