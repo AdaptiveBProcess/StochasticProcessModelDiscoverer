@@ -13,7 +13,7 @@ from extraction import schedule_tables as sch
 from extraction import tasks_evaluator as te
 
 
-class StructureParametersMiner():
+class StructureParametersMiner:
     """
     This class extracts all the BPS parameters
     """
@@ -50,16 +50,12 @@ class StructureParametersMiner():
         # inter-arrival times and durations by default mean an exponential
         # 'manual', 'automatic', 'semi-automatic', 'default'
         self.settings['pdef_method'] = 'default'
-        # self.settings['rp_similarity'] = 0.5
         self.process_stats = list()
         self.parameters = dict()
         self.conformant_traces = list()
         self.is_safe = True
 
     def extract_parameters(self, num_inst, start_time, resource_pool) -> None:
-        """
-        main method for parameters extraction
-        """
         self.is_safe = self._replay_process(is_safe=self.is_safe)
         self.is_safe = self._mine_interarrival(is_safe=self.is_safe)
         self.is_safe = self._mine_gateways_probabilities(is_safe=self.is_safe)
@@ -110,9 +106,7 @@ class StructureParametersMiner():
         """
         Calculates the inter-arrival rate
         """
-        inter_evaluator = arr.InterArrivalEvaluator(self.process_graph,
-                                                    self.conformant_traces,
-                                                    self.settings)
+        inter_evaluator = arr.InterArrivalEvaluator(self.process_graph, self.conformant_traces, self.settings)
         self.parameters['arrival_rate'] = inter_evaluator.dist
 
     @Decorators.safe_exec
@@ -120,12 +114,10 @@ class StructureParametersMiner():
         """
         Gateways probabilities 1=Historical, 2=Random, 3=Equiprobable
         """
-        gevaluator = gt.GatewaysEvaluator(self.process_graph,
-                                          self.settings['gate_management'])
+        gevaluator = gt.GatewaysEvaluator(self.process_graph, self.settings['gate_management'])
         sequences = gevaluator.probabilities
         for seq in sequences:
-            seq['elementid'] = self.bpmn.find_sequence_id(seq['gatewayid'],
-                                                          seq['out_path_id'])
+            seq['elementid'] = self.bpmn.find_sequence_id(seq['gatewayid'], seq['out_path_id'])
         self.parameters['sequences'] = sequences
 
     @Decorators.safe_exec
