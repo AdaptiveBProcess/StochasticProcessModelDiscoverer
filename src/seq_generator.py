@@ -20,10 +20,10 @@ import pandas as pd
 import utils.support as sup
 from utils.support import safe_exec
 
-from core_modules.sequences_generator import structure_optimizer as so
-from support_modules.common import FileExtensions as Fe
-from support_modules.common import LogAttributes as La
-from support_modules.common import SequencesGenerativeMethods as SqM
+import structure_optimizer as so
+from common import FileExtensions as Fe
+from common import LogAttributes as La
+from common import SequencesGenerativeMethods as SqM
 
 
 class SeqGeneratorFabric:

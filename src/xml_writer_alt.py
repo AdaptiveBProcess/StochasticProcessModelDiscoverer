@@ -5,11 +5,10 @@ Created on Mon Nov 15 15:59:04 2021
 @author: Manuel Camargo
 """
 import itertools as it
-import os
-from pathlib import Path
 from typing import Union
 
 import pandas as pd
+import readers.log_reader as lr
 from opyenxes.data_out.XesXmlSerializer import XesXmlSerializer
 from opyenxes.extension.std.XLifecycleExtension import XLifecycleExtension as xlc
 from opyenxes.factory.XFactory import XFactory
@@ -17,11 +16,8 @@ from pm4py.objects.conversion.log import converter
 from pm4py.objects.log.exporter.xes import exporter
 from pm4py.objects.log.util import interval_lifecycle
 
-# from ..configuration import Configuration, ReadOptions
-import readers.log_reader as lr
 
-
-class XesWriter(object):  # TODO: it makes sense to save data also with LogReader instead of a separate class
+class XesWriter(object):
     """
     This class writes a process log in .xes format
     """

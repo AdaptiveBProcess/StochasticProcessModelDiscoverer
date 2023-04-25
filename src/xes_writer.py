@@ -10,7 +10,6 @@ import itertools as it
 import os
 import pandas as pd
 from opyenxes.factory.XFactory import XFactory
-# from opyenxes.info import XLogInfoFactory
 from opyenxes.data_out.XesXmlSerializer import XesXmlSerializer
 from opyenxes.extension.std.XLifecycleExtension import XLifecycleExtension as xlc
 

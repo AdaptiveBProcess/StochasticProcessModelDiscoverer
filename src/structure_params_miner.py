@@ -6,9 +6,9 @@ Created on Fri Mar  6 20:47:09 2020
 """
 import traceback
 
-from extraction import log_replayer as rpl
-from extraction import interarrival_definition as arr
 from extraction import gateways_probabilities as gt
+from extraction import interarrival_definition as arr
+from extraction import log_replayer as rpl
 from extraction import schedule_tables as sch
 from extraction import tasks_evaluator as te
 
@@ -80,7 +80,7 @@ class StructureParametersMiner:
 
     # @Decorators.safe_exec
     @staticmethod
-    def mine_resources(settings, log) -> None:
+    def mine_resources(settings, log) -> dict:
         """
         Analysing resource pool LV917 or 247
         """

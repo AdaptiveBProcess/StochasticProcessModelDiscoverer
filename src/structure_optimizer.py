@@ -4,39 +4,39 @@ Created on Tue Nov 17 10:48:57 2020
 
 @author: Manuel Camargo
 """
-import os
-import subprocess
 import copy
-import multiprocessing
-from multiprocessing import Pool
 import itertools
+import math
+import multiprocessing
+import os
+import random
+import subprocess
+import time
 import traceback
+from multiprocessing import Pool
+
+import analyzers.sim_evaluator as sim
 import numpy as np
 import pandas as pd
-import math
-import random
-
-from hyperopt import tpe
-from hyperopt import Trials, hp, fmin, STATUS_OK, STATUS_FAIL
-
-import utils.support as sup
-from utils.support import timeit
-import readers.log_splitter as ls
 import readers.log_reader as lr
-import xes_writer as xes
-import xml_writer as xml
-import analyzers.sim_evaluator as sim
+import readers.log_splitter as ls
+import utils.support as sup
+from hyperopt import Trials, hp, fmin, STATUS_OK, STATUS_FAIL
+from hyperopt import tpe
+from tqdm import tqdm
+from utils.support import timeit
 
 import structure_miner as sm
 import structure_params_miner as spm
-from tqdm import tqdm
-import time
+import xes_writer as xes
+import xml_writer as xml
 
 
 class StructureOptimizer:
     """
     Hyperparameter-optimizer class
     """
+
     class Decorators(object):
 
         @classmethod
@@ -49,6 +49,7 @@ class StructureOptimizer:
             -------
             dict : execution status
             """
+
             def safety_check(*args, **kw):
                 status = kw.get('status', method.__name__.upper())
                 response = {'values': [], 'status': status}
@@ -60,6 +61,7 @@ class StructureOptimizer:
                         traceback.print_exc()
                         response['status'] = STATUS_FAIL
                 return response
+
             return safety_check
 
     def __init__(self, settings, log):
@@ -69,7 +71,7 @@ class StructureOptimizer:
         # Read inputs
         self.log = log
         self._split_timeline(0.8, settings['read_options']['one_timestamp'])
-        
+
         self.org_log = copy.deepcopy(log)
         self.org_log_train = copy.deepcopy(self.log_train)
         self.org_log_valdn = copy.deepcopy(self.log_valdn)
@@ -99,7 +101,7 @@ class StructureOptimizer:
             var_dim['concurrency'] = hp.uniform('concurrency', settings['concurrency'][0], settings['concurrency'][1])
         csettings = copy.deepcopy(settings)
         for key in var_dim.keys():
-            csettings.pop(key, None) 
+            csettings.pop(key, None)
         space = {**var_dim, **csettings}
         return space
 
@@ -110,9 +112,9 @@ class StructureOptimizer:
         self.log_train = copy.deepcopy(self.org_log_train)
 
         def exec_pipeline(trial_stg):
-            print('train split:', 
-                  len(pd.DataFrame(self.log_train.data).caseid.unique()), 
-                  ', valdn split:', 
+            print('train split:',
+                  len(pd.DataFrame(self.log_train.data).caseid.unique()),
+                  ', valdn split:',
                   len(pd.DataFrame(self.log_valdn).caseid.unique()),
                   sep=' ')
             # Vars initialization
@@ -159,10 +161,10 @@ class StructureOptimizer:
         try:
             results = (pd.DataFrame(self.bayes_trials.results)
                        .sort_values('loss', ascending=bool))
-            self.best_output = (results[results.status=='ok']
+            self.best_output = (results[results.status == 'ok']
                                 .head(1).iloc[0].output)
             self.best_parms = best
-            self.best_similarity = (results[results.status=='ok']
+            self.best_similarity = (results[results.status == 'ok']
                                     .head(1).iloc[0].loss)
         except Exception as e:
             print(e)
@@ -200,7 +202,7 @@ class StructureOptimizer:
 
     @timeit(rec_name='EXTRACTING_PARAMS')
     @Decorators.safe_exec
-    def _extract_parameters(self, settings, structure, parameters, 
+    def _extract_parameters(self, settings, structure, parameters,
                             **kwargs) -> None:
         bpmn, process_graph = structure
         p_extractor = spm.StructureParametersMiner(self.log_train,
@@ -220,9 +222,9 @@ class StructureOptimizer:
             # print parameters in xml bimp format
             xml.print_parameters(os.path.join(
                 settings['output'],
-                settings['file'].split('.')[0]+'.bpmn'),
+                settings['file'].split('.')[0] + '.bpmn'),
                 os.path.join(settings['output'],
-                             settings['file'].split('.')[0]+'.bpmn'),
+                             settings['file'].split('.')[0] + '.bpmn'),
                 parameters)
 
             self.log_valdn.rename(columns={'user': 'resource'}, inplace=True)
@@ -236,8 +238,8 @@ class StructureOptimizer:
 
     @timeit(rec_name='SIMULATION_EVAL')
     @Decorators.safe_exec
-    def _simulate(self, settings, data,**kwargs) -> list:
-        
+    def _simulate(self, settings, data, **kwargs) -> list:
+
         def pbar_async(p, msg):
             pbar = tqdm(total=reps, desc=msg)
             processed = 0
@@ -251,10 +253,10 @@ class StructureOptimizer:
             pbar.update(n=(reps - processed))
             p.wait()
             pbar.close()
-            
+
         reps = settings['repetitions']
         cpu_count = multiprocessing.cpu_count()
-        w_count =  reps if reps <= cpu_count else cpu_count
+        w_count = reps if reps <= cpu_count else cpu_count
         pool = Pool(processes=w_count)
         # Simulate
         args = [(settings, rep) for rep in range(reps)]
@@ -267,7 +269,7 @@ class StructureOptimizer:
         args = [(settings, data, log) for log in p.get()]
         if len(self.log_valdn.caseid.unique()) > 1000:
             pool.close()
-            results = [self.evaluate_logs(arg) 
+            results = [self.evaluate_logs(arg)
                        for arg in tqdm(args, 'evaluating results:')]
             # Save results
             sim_values = list(itertools.chain(*results))
@@ -296,7 +298,7 @@ class StructureOptimizer:
             m_settings['read_options']['column_names'] = column_names
             temp = lr.LogReader(os.path.join(
                 m_settings['output'], 'sim_data',
-                m_settings['file'].split('.')[0] + '_'+str(rep + 1)+'.csv'),
+                m_settings['file'].split('.')[0] + '_' + str(rep + 1) + '.csv'),
                 m_settings['read_options'],
                 verbose=False)
             temp = pd.DataFrame(temp.data)
@@ -306,6 +308,7 @@ class StructureOptimizer:
             temp['run_num'] = rep + 1
             temp = temp[~temp.task.isin(['Start', 'End'])]
             return temp
+
         return read(*args)
 
     @staticmethod
@@ -317,7 +320,7 @@ class StructureOptimizer:
                 rep (int): repetition number
             """
             rep = (sim_log.iloc[0].run_num)
-            sim_values = list()			   
+            sim_values = list()
             evaluator = sim.SimilarityEvaluator(
                 data,
                 sim_log,
@@ -326,6 +329,7 @@ class StructureOptimizer:
             evaluator.measure_distance('dl')
             sim_values.append({**{'run_num': rep}, **evaluator.similarity})
             return sim_values
+
         return evaluate(*args)
 
     @staticmethod
@@ -338,12 +342,13 @@ class StructureOptimizer:
             """
             args = ['java', '-jar', settings['bimp_path'],
                     os.path.join(settings['output'],
-                                  settings['file'].split('.')[0]+'.bpmn'),
+                                 settings['file'].split('.')[0] + '.bpmn'),
                     '-csv',
                     os.path.join(settings['output'], 'sim_data',
-                                  settings['file']
-                                  .split('.')[0]+'_'+str(rep+1)+'.csv')]
+                                 settings['file']
+                                 .split('.')[0] + '_' + str(rep + 1) + '.csv')]
             subprocess.run(args, check=True, stdout=subprocess.PIPE)
+
         sim_call(*args)
 
     @staticmethod
@@ -352,7 +357,7 @@ class StructureOptimizer:
             times = [{**{'output': settings['output']}, **times}]
             log_file = os.path.join(temp_output, 'execution_times.csv')
             if not os.path.exists(log_file):
-                    open(log_file, 'w').close()
+                open(log_file, 'w').close()
             if os.path.getsize(log_file) > 0:
                 sup.create_csv_file(times, log_file, mode='a')
             else:
@@ -417,7 +422,7 @@ class StructureOptimizer:
         train, valdn = splitter.split_log('timeline_contained', size, one_ts)
         total_events = len(self.log.data)
         # Check size and change time splitting method if necesary
-        if len(valdn) < int(total_events*0.1):
+        if len(valdn) < int(total_events * 0.1):
             train, valdn = splitter.split_log('timeline_trace', size, one_ts)
         # Set splits
         key = 'end_timestamp' if one_ts else 'start_timestamp'
@@ -427,14 +432,14 @@ class StructureOptimizer:
         train = self._sample_log(train)
         # Save partitions
         self.log_valdn = (valdn.sort_values(key, ascending=True)
-                         .reset_index(drop=True))
+                          .reset_index(drop=True))
         self.log_train = copy.deepcopy(self.log)
         self.log_train.set_data(train.sort_values(key, ascending=True)
                                 .reset_index(drop=True).to_dict('records'))
 
     @staticmethod
     def _sample_log(train):
-        
+
         def sample_size(p_size, c_level, c_interval):
             """
             p_size : population size.
@@ -444,18 +449,18 @@ class StructureOptimizer:
             c_level_constant = {50: .67, 68: .99, 90: 1.64, 95: 1.96, 99: 2.57}
             Z = 0.0
             p = 0.5
-            e = c_interval/100.0
+            e = c_interval / 100.0
             N = p_size
             n_0 = 0.0
             n = 0.0
             # DEVIATIONS FOR THAT CONFIDENCE LEVEL
             Z = c_level_constant[c_level]
             # CALC SAMPLE SIZE
-            n_0 = ((Z**2) * p * (1-p)) / (e**2)
+            n_0 = ((Z ** 2) * p * (1 - p)) / (e ** 2)
             # ADJUST SAMPLE SIZE FOR FINITE POPULATION
-            n = n_0 / (1 + ((n_0 - 1) / float(N)) )
-            return int(math.ceil(n)) # THE SAMPLE SIZE
-        
+            n = n_0 / (1 + ((n_0 - 1) / float(N)))
+            return int(math.ceil(n))  # THE SAMPLE SIZE
+
         cases = list(train.caseid.unique())
         if len(cases) > 1000:
             sample_sz = sample_size(len(cases), 95.0, 3.0)

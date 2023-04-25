@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-import re
 import datetime
-import utils.support as sup
-from operator import itemgetter
-import subprocess
 import os
 import platform as pl
+import re
+import subprocess
+from operator import itemgetter
+
+import utils.support as sup
 
 
 class TracesAligner(object):
@@ -62,7 +63,7 @@ class TracesAligner(object):
                         aligned_traces.extend(aligned_trace)
             except Exception as e:
                 next
-            sup.print_progress(((i / (size-1)) * 100),
+            sup.print_progress(((i / (size - 1)) * 100),
                                'Aligning log traces with model ')
             i += 1
         sup.print_done_task()
@@ -103,9 +104,9 @@ class TracesAligner(object):
                         time = (aligned_trace[-1]['end_timestamp']
                                 if self.one_timestamp else aligned_trace[-1]['timestamp'])
                         time += datetime.timedelta(microseconds=1)
-                    new_event = {'caseid':caseid,
-                                 'task':optimal_alignment[i]['task_name'],
-                                 'user':'AUTO'}
+                    new_event = {'caseid': caseid,
+                                 'task': optimal_alignment[i]['task_name'],
+                                 'user': 'AUTO'}
                     if self.one_timestamp:
                         new_event['end_timestamp'] = time
                     else:
@@ -147,7 +148,7 @@ class TracesAligner(object):
             complete_events = sorted(list(
                 filter(lambda x: x['task'] == task, complete_list)),
                 key=itemgetter('timestamp'))
-            if(len(start_events) == len(complete_events)):
+            if (len(start_events) == len(complete_events)):
                 for i, _ in enumerate(start_events):
                     new_trace.append({
                         'caseid': start_events[i]['caseid'],
@@ -197,11 +198,11 @@ class TracesAligner(object):
                 trace.append(temp_event)
         return trace
 
-# =============================================================================
-# External tool calling
-# =============================================================================
-# TODO: modify this three methods to create just one that evaluates and merge
-# all the alignment data in just one structure
+    # =============================================================================
+    # External tool calling
+    # =============================================================================
+    # TODO: modify this three methods to create just one that evaluates and merge
+    # all the alignment data in just one structure
 
     def evaluate_alignment(self, settings):
         """
@@ -215,20 +216,20 @@ class TracesAligner(object):
         print(" -- Evaluating event log alignment --")
         file_name = settings['file'].split('.')[0]
         args = ['java']
-        if not pl.system().lower() == 'windows':
+        if pl.system().lower() != 'windows':
             args.append('-Xmx2G')
             args.append('-Xss8G')
-							 
+
         args.extend(['-jar', settings['align_path'],
-                settings['output']+os.sep,
-                file_name+'.xes',
-                settings['file'].split('.')[0]+'.bpmn',
-                'true'])
+                     settings['output'] + os.sep,
+                     file_name + '.xes',
+                     settings['file'].split('.')[0] + '.bpmn',
+                     'true'])
         subprocess.call(args, bufsize=-1)
 
-# =============================================================================
-# Support
-# =============================================================================
+    # =============================================================================
+    # Support
+    # =============================================================================
     def read_alignment_info(self, filename):
         """
         Method for the reading of the alignment specification

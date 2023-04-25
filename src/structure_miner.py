@@ -13,7 +13,7 @@ import readers.bpmn_reader as br
 import readers.process_structure as gph
 
 import conformance_checking as chk
-from common import SplitMinerVersion as smv
+from common import SplitMinerVersion as SmV
 
 
 class StructureMiner:
@@ -33,11 +33,11 @@ class StructureMiner:
         miner(self.settings)
 
     def _get_miner(self, miner):
-        if miner == smv.SM_V1:
+        if miner == SmV.SM_V1:
             return self._sm1_miner
-        elif miner == smv.SM_V2:
+        elif miner == SmV.SM_V2:
             return self._sm2_miner
-        elif miner == smv.SM_V3:
+        elif miner == SmV.SM_V3:
             return self._sm3_miner
         else:
             raise ValueError(miner)
@@ -98,7 +98,7 @@ class StructureMiner:
 
     def _evaluate_alignment(self) -> None:
         # load bpmn model
-        self.bpmn = br.BpmnReader(os.path.join( self.settings['output'], self.settings['file'].split('.')[0] + '.bpmn'))
+        self.bpmn = br.BpmnReader(os.path.join(self.settings['output'], self.settings['file'].split('.')[0] + '.bpmn'))
         self.process_graph = gph.create_process_structure(self.bpmn)
         # Evaluate alignment
         chk.evaluate_alignment(self.process_graph, self.log, self.settings)
