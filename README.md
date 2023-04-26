@@ -39,7 +39,7 @@ Once created the environment, you can execute the tool from a terminal specifyin
 **Example of execution:**
 
 ```shell
-$ sp_model_discoverer discover --file ..\data\Production.xes --exp_reps 10
+$ spmd discover --file ..\data\Production.xes --exp_reps 10
 ```
 **Generation:**
 
@@ -51,5 +51,5 @@ $ sp_model_discoverer discover --file ..\data\Production.xes --exp_reps 10
 **Example of execution:**
 
 ```shell
-$ sp_model_discoverer generate --generative_model ..\data\Production.bpmn --exp_reps 10
+$ spmd generate --generative_model ..\data\Production.bpmn --exp_reps 10
 ```
