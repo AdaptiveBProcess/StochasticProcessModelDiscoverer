@@ -49,7 +49,7 @@ class SeqGenerator(metaclass=ABCMeta):
         self.model_path = None
 
     @abstractmethod
-    def generate(self, num_inst, start_time):
+    def generate(self, num_inst, exp_reps):
         pass
 
     @abstractmethod
@@ -112,47 +112,49 @@ class StochasticProcessModelGenerator(SeqGenerator):
         # clean output folder
         # shutil.rmtree(structure_optimizer.temp_output)
 
-    def generate(self, num_inst, start_time):
+    def generate(self, num_inst, exp_reps):
+        self.model_path = self.parameters['file']
         # update model parameters
-        self._modify_simulation_model(self.model_path, num_inst, start_time)
-        temp_path = self._temp_path_creation()
+        self._modify_simulation_model(self.model_path, num_inst)
+        temp_path = self._temp_path_creation(self.parameters['output_path'])
         # generate instances
-        sim_log = self._execute_simulator(self.parameters['bimp_path'], temp_path, self.model_path)
-        # order by Case ID and add position in the trace
-        sim_log = self._rename_sim_log(sim_log)
-        # save traces
-        self.gen_seqs = sim_log
-        # remove simulated log
-        shutil.rmtree(temp_path)
+        for rep_num in range(0, exp_reps):
+            sim_log = self._execute_simulator(self.parameters['bimp_path'], temp_path, self.model_path)
+            # order by Case ID and add position in the trace
+            self.gen_seqs = self._rename_sim_log(sim_log)
+            # remove simulated log
+            self.clean_time_stamps()
+            # save sequences
+            self.gen_seqs.to_csv(os.path.join(temp_path, sup.file_id('SEQ_')), index=False)
 
     def _rename_sim_log(self, sim_log):
-        sim_log = pd.read_csv(sim_log)
-        sim_log = self.sort_log(sim_log)
-        sim_log[La.CASE_ID] = sim_log[La.CASE_ID] + 1
-        sim_log[La.CASE_ID] = sim_log[La.CASE_ID].astype('string')
-        sim_log[La.CASE_ID] = f"Case{sim_log[La.CASE_ID]}"
-        return sim_log
+        sim_log_df = pd.read_csv(sim_log)
+        sim_log_df = self.sort_log(sim_log_df)
+        sim_log_df[La.CASE_ID] = sim_log_df[La.CASE_ID] + 1
+        sim_log_df[La.CASE_ID] = sim_log_df[La.CASE_ID].astype('string')
+        sim_log_df[La.CASE_ID] = f"Case{sim_log_df[La.CASE_ID]}"
+        os.remove(sim_log)
+        return sim_log_df
 
     def clean_time_stamps(self):
         self.gen_seqs.drop(columns=[La.START_TIME, La.END_TIME], inplace=True)
 
     @staticmethod
-    def _temp_path_creation() -> Path:
+    def _temp_path_creation(output_files) -> Path:
         # Paths redefinition
-        temp_path = os.path.join('output_files', sup.folder_id())
+        temp_path = os.path.join(output_files, sup.folder_id())
         # Output folder creation
         if not os.path.exists(temp_path):
             os.makedirs(temp_path)
         return Path(temp_path)
 
     @staticmethod
-    def _modify_simulation_model(model, num_inst, start_time):
+    def _modify_simulation_model(model, num_inst):
         """Modifies the number of instances of the BIMP simulation model
         to be equal to the number of instances in the testing log"""
         my_doc = minidom.parse(model)
         items = my_doc.getElementsByTagName('qbp:processSimulationInfo')
         items[0].attributes['processInstances'].value = str(num_inst)
-        items[0].attributes['startDateTime'].value = start_time
         with open(model, 'wb') as f:
             f.write(my_doc.toxml().encode('utf-8'))
         f.close()
@@ -167,7 +169,7 @@ class StochasticProcessModelGenerator(SeqGenerator):
 
 class OriginalSequencesGenerator(SeqGenerator):
 
-    def generate(self, log, start_time):
+    def generate(self, log, exp_reps):
         sequences = log.copy(deep=True)
         sequences = sequences[[La.CASE_ID, La.ACTIVITY, La.RESOURCE, La.START_TIME]]
         replacements = {case_name: f'Case{idx + 1}' for idx, case_name in enumerate(sequences[La.CASE_ID].unique())}

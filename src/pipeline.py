@@ -49,16 +49,13 @@ def discover_model(file, evaluate, mining_alg, exp_reps, s_gen_max_eval):
 @click.option('--generative_model', default=None, required=True, type=str)
 @click.option('--evaluate/--no-evaluate', default=True, required=False, type=bool)
 @click.option('--num_inst', default=5, required=True, type=int)
-@click.option('--start_time', default=None, required=True, type=str)
 @click.option('--exp_reps', default=5, required=False, type=int)
-@click.option('--seq_gen_method', default=SqG.PROCESS_MODEL, required=False, type=click.Choice(SqG().get_methods()))
-def generate_sequences(generative_model, evaluate, num_inst, start_time, exp_reps):
+def generate_sequences(generative_model, evaluate, num_inst, exp_reps):
     params = {'file': generative_model, 'evaluate': evaluate, 'mining_alg': None}
     params = read_properties(params)
     seq_generator_class = SeqGeneratorFabric.get_generator(SqG.PROCESS_MODEL)
     seq_generator = seq_generator_class(params)
-    for rep_num in range(0, exp_reps):
-        seq_generator.generate(num_inst, start_time)
+    seq_generator.generate(num_inst, exp_reps)
 
 
 def read_properties(params):
