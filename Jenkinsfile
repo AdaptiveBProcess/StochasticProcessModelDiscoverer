@@ -7,7 +7,6 @@ pipeline {
         CHANGE_BRANCH = "${env.CHANGE_BRANCH}"
         MAIN_BRANCH = 'main'
         LONG_LIVED_PATTERN = "release.*"
-        SONAR_QUBE_PLUGIN = "C:\ProgramData\Jenkins\.jenkins\tools\hudson.plugins.sonar.SonarRunnerInstallation\SonarQubeScanner\bin\sonar-scanner"
     }
     options {
         disableConcurrentBuilds()
@@ -26,7 +25,7 @@ pipeline {
                         withSonarQubeEnv('SonarCloud')
                         {
                             sh "git fetch origin ${CHANGE_TARGET}:refs/remotes/origin/${CHANGE_TARGET}"
-                            sh '''${SONAR_QUBE_PLUGIN} \
+                            sh '''${tool("SonarQubeScanner")}/bin/sonar-scanner \
                                 -Dsonar.pullrequest.key=${CHANGE_ID} \
                                 -Dsonar.pullrequest.branch=${CHANGE_BRANCH} \
                                 -Dsonar.pullrequest.base=${CHANGE_TARGET}'''
@@ -44,7 +43,7 @@ pipeline {
                         def scannerHome = tool 'SonarQubeScanner';
                         withSonarQubeEnv('SonarCloud')
                         {
-                            sh '''${SONAR_QUBE_PLUGIN} \
+                            sh '''${tool("SonarQubeScanner")}/bin/sonar-scanner \
                                 -Dsonar.branch.name=${BRANCH_NAME}'''
                         }
                     }
@@ -60,7 +59,7 @@ pipeline {
                         def scannerHome = tool 'SonarQubeScanner';
                         withSonarQubeEnv('SonarCloud')
                         {
-                            sh '''${SONAR_QUBE_PLUGIN} \
+                            sh '''${tool("SonarQubeScanner")}/bin/sonar-scanner \
                                 -Dsonar.branch.name=${BRANCH_NAME} \
                                 -Dsonar.branch.target=${MAIN_BRANCH}'''
                         }
@@ -77,7 +76,7 @@ pipeline {
                         def scannerHome = tool 'SonarQubeScanner';
                         withSonarQubeEnv('SonarCloud')
                         {
-                            sh '''${SONAR_QUBE_PLUGIN} \
+                            sh '''${tool("SonarQubeScanner")}/bin/sonar-scanner \
                                 -Dsonar.branch.name=${BRANCH_NAME} \
                                 -Dsonar.branch.target=${BRANCH_NAME}'''
                         }
