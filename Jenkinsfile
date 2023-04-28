@@ -7,6 +7,7 @@ pipeline {
         CHANGE_BRANCH = "${env.CHANGE_BRANCH}"
         MAIN_BRANCH = 'main'
         LONG_LIVED_PATTERN = "release.*"
+        JENKINS_HOME = "${env.JENKINS_HOME}"
     }
     options {
         disableConcurrentBuilds()
@@ -25,7 +26,7 @@ pipeline {
                         withSonarQubeEnv('SonarCloud')
                         {
                             sh "git fetch origin ${CHANGE_TARGET}:refs/remotes/origin/${CHANGE_TARGET}"
-                            sh '''${scannerHome}/bin/sonar-scanner \
+                            sh '''${JENKINS_HOME}/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQubeScanner/bin/sonar-scanner \
                                 -Dsonar.pullrequest.key=${CHANGE_ID} \
                                 -Dsonar.pullrequest.branch=${CHANGE_BRANCH} \
                                 -Dsonar.pullrequest.base=${CHANGE_TARGET}'''
@@ -43,7 +44,7 @@ pipeline {
                         def scannerHome = tool 'SonarQubeScanner';
                         withSonarQubeEnv('SonarCloud')
                         {
-                            sh '''${scannerHome}/bin/sonar-scanner \
+                            sh '''${JENKINS_HOME}/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQubeScanner/bin/sonar-scanner \
                                 -Dsonar.branch.name=${BRANCH_NAME}'''
                         }
                     }
@@ -59,7 +60,7 @@ pipeline {
                         def scannerHome = tool 'SonarQubeScanner';
                         withSonarQubeEnv('SonarCloud')
                         {
-                            sh '''${scannerHome}/bin/sonar-scanner \
+                            sh '''${JENKINS_HOME}/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQubeScanner/bin/sonar-scanner \
                                 -Dsonar.branch.name=${BRANCH_NAME} \
                                 -Dsonar.branch.target=${MAIN_BRANCH}'''
                         }
@@ -76,7 +77,7 @@ pipeline {
                         def scannerHome = tool 'SonarQubeScanner';
                         withSonarQubeEnv('SonarCloud')
                         {
-                            sh '''${scannerHome}/bin/sonar-scanner \
+                            sh '''${JENKINS_HOME}/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQubeScanner/bin/sonar-scanner \
                                 -Dsonar.branch.name=${BRANCH_NAME} \
                                 -Dsonar.branch.target=${BRANCH_NAME}'''
                         }
