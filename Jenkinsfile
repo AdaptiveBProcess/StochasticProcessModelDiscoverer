@@ -7,7 +7,7 @@ pipeline {
         CHANGE_BRANCH = "${env.CHANGE_BRANCH}"
         MAIN_BRANCH = 'main'
         LONG_LIVED_PATTERN = "release.*"
-        SONAR_QUBE_PLUGIN = "/var/jenkins_home/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQubeScanner/bin/sonar-scanner"
+        SONAR_QUBE_PLUGIN = "C:\\ProgramData\\Jenkins\\tools\\hudson.plugins.sonar.SonarRunnerInstallation\\SonarQubeScanner\\bin\\sonar-scanner"
     }
     options {
         disableConcurrentBuilds()
@@ -29,8 +29,7 @@ pipeline {
                             sh '''${SONAR_QUBE_PLUGIN} \
                                 -Dsonar.pullrequest.key=${CHANGE_ID} \
                                 -Dsonar.pullrequest.branch=${CHANGE_BRANCH} \
-                                -Dsonar.pullrequest.base=${CHANGE_TARGET} \
-                                -Dsonar.python.coverage.reportPaths=coverage.xml'''
+                                -Dsonar.pullrequest.base=${CHANGE_TARGET}'''
                         }
                     }
                 }
@@ -46,8 +45,7 @@ pipeline {
                         withSonarQubeEnv('SonarCloud')
                         {
                             sh '''${SONAR_QUBE_PLUGIN} \
-                                -Dsonar.branch.name=${BRANCH_NAME} \
-                                -Dsonar.python.coverage.reportPaths=coverage.xml'''
+                                -Dsonar.branch.name=${BRANCH_NAME}'''
                         }
                     }
                 }
@@ -64,8 +62,7 @@ pipeline {
                         {
                             sh '''${SONAR_QUBE_PLUGIN} \
                                 -Dsonar.branch.name=${BRANCH_NAME} \
-                                -Dsonar.branch.target=${MAIN_BRANCH} \
-                                -Dsonar.python.coverage.reportPaths=coverage.xml'''
+                                -Dsonar.branch.target=${MAIN_BRANCH}'''
                         }
                     }
                 }
@@ -82,8 +79,7 @@ pipeline {
                         {
                             sh '''${SONAR_QUBE_PLUGIN} \
                                 -Dsonar.branch.name=${BRANCH_NAME} \
-                                -Dsonar.branch.target=${BRANCH_NAME} \
-                                -Dsonar.python.coverage.reportPaths=coverage.xml'''
+                                -Dsonar.branch.target=${BRANCH_NAME}'''
                         }
                     }
                 }
