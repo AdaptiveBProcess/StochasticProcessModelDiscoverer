@@ -25,7 +25,7 @@ pipeline {
                         withSonarQubeEnv('SonarCloud')
                         {
                             sh "git fetch origin ${CHANGE_TARGET}:refs/remotes/origin/${CHANGE_TARGET}"
-                            sh '''${tool("SonarQubeScanner")}/bin/sonar-scanner \
+                            sh '''${scannerHome}/bin/sonar-scanner \
                                 -Dsonar.pullrequest.key=${CHANGE_ID} \
                                 -Dsonar.pullrequest.branch=${CHANGE_BRANCH} \
                                 -Dsonar.pullrequest.base=${CHANGE_TARGET}'''
@@ -43,7 +43,7 @@ pipeline {
                         def scannerHome = tool 'SonarQubeScanner';
                         withSonarQubeEnv('SonarCloud')
                         {
-                            sh '''${tool("SonarQubeScanner")}/bin/sonar-scanner \
+                            sh '''${scannerHome}/bin/sonar-scanner \
                                 -Dsonar.branch.name=${BRANCH_NAME}'''
                         }
                     }
@@ -59,7 +59,7 @@ pipeline {
                         def scannerHome = tool 'SonarQubeScanner';
                         withSonarQubeEnv('SonarCloud')
                         {
-                            sh '''${tool("SonarQubeScanner")}/bin/sonar-scanner \
+                            sh '''${scannerHome}/bin/sonar-scanner \
                                 -Dsonar.branch.name=${BRANCH_NAME} \
                                 -Dsonar.branch.target=${MAIN_BRANCH}'''
                         }
@@ -76,7 +76,7 @@ pipeline {
                         def scannerHome = tool 'SonarQubeScanner';
                         withSonarQubeEnv('SonarCloud')
                         {
-                            sh '''${tool("SonarQubeScanner")}/bin/sonar-scanner \
+                            sh '''${scannerHome}/bin/sonar-scanner \
                                 -Dsonar.branch.name=${BRANCH_NAME} \
                                 -Dsonar.branch.target=${BRANCH_NAME}'''
                         }
