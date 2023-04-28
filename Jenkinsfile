@@ -7,7 +7,7 @@ pipeline {
         CHANGE_BRANCH = "${env.CHANGE_BRANCH}"
         MAIN_BRANCH = 'main'
         LONG_LIVED_PATTERN = "release.*"
-        SONAR_QUBE_PLUGIN = "C:\\ProgramData\\Jenkins\\tools\\hudson.plugins.sonar.SonarRunnerInstallation\\SonarQubeScanner\\bin\\sonar-scanner"
+        SONAR_QUBE_PLUGIN = "C:\\ProgramData\\Jenkins\\.jenkins\\tools\\hudson.plugins.sonar.SonarRunnerInstallation\\SonarQubeScanner\\bin\\sonar-scanner"
     }
     options {
         disableConcurrentBuilds()
