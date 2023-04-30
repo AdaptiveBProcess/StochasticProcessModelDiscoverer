@@ -27,6 +27,7 @@ def main():
 @click.option('--mining_alg', default=Sm.SM_V1, required=False, type=click.Choice(Sm().get_methods()))
 @click.option('--exp_reps', default=5, required=False, type=int)
 @click.option('--s_gen_max_eval', default=30, required=False, type=int)
+
 def discover_model(file, evaluate, mining_alg, exp_reps, s_gen_max_eval):
     params = {'file': file, 'evaluate': evaluate, 'mining_alg': mining_alg}
     params = read_properties(params)
@@ -50,6 +51,7 @@ def discover_model(file, evaluate, mining_alg, exp_reps, s_gen_max_eval):
 @click.option('--evaluate/--no-evaluate', default=True, required=False, type=bool)
 @click.option('--num_inst', default=5, required=True, type=int)
 @click.option('--exp_reps', default=5, required=False, type=int)
+
 def generate_sequences(generative_model, evaluate, num_inst, exp_reps):
     params = {'file': generative_model, 'evaluate': evaluate, 'mining_alg': None}
     params = read_properties(params)
