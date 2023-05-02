@@ -27,9 +27,10 @@ def main():
 @click.option('--mining_alg', default=Sm.SM_V1, required=False, type=click.Choice(Sm().get_methods()))
 @click.option('--exp_reps', default=5, required=False, type=int)
 @click.option('--s_gen_max_eval', default=30, required=False, type=int)
+@click.option('--discovery_method', default='simulation', required=False, type=str)
 
-def discover_model(file, evaluate, mining_alg, exp_reps, s_gen_max_eval):
-    params = {'file': file, 'evaluate': evaluate, 'mining_alg': mining_alg}
+def discover_model(file, evaluate, mining_alg, exp_reps, s_gen_max_eval, discovery_method):
+    params = {'file': file, 'evaluate': evaluate, 'mining_alg': mining_alg, 'discovery_method':discovery_method}
     params = read_properties(params)
     # Sequences generator
     search_space = dict()

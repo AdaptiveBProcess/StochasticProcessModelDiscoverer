@@ -6,19 +6,18 @@ Created on Tue Nov 17 10:48:57 2020
 """
 import copy
 import itertools
-import math
 import multiprocessing
 import os
-import random
-import subprocess
 import time
 import traceback
 from multiprocessing import Pool
+import subprocess
 
 import analyzers.sim_evaluator as sim
+import readers.log_reader as lr
+
 import numpy as np
 import pandas as pd
-import readers.log_reader as lr
 import readers.log_splitter as ls
 import utils.support as sup
 from hyperopt import Trials, hp, fmin, STATUS_OK, STATUS_FAIL
@@ -31,6 +30,7 @@ import structure_params_miner as spm
 import xes_writer as xes
 import xml_writer as xml
 from common import FileExtensions as Fe
+import common as cm
 
 
 class StructureOptimizer:
@@ -69,6 +69,7 @@ class StructureOptimizer:
         """constructor"""
         self.log_train = None
         self.mining_alg = settings['mining_alg']
+        self.discovery_method = settings['discovery_method']
         self.define_search_space(search_space)
         # Read inputs
         self.log = log
@@ -109,7 +110,7 @@ class StructureOptimizer:
         parameters = spm.StructureParametersMiner.mine_resources(self.settings, self.log_train)
         self.log_train = copy.deepcopy(self.org_log_train)
 
-        def exec_pipeline(trial_stg):
+        def exec_pipeline_simulation(trial_stg):
             trial_stg = {**trial_stg, **self.settings}
             print('train split:', len(pd.DataFrame(self.log_train.data).caseid.unique()),
                   ', valdn split:', len(pd.DataFrame(self.log_valdn).caseid.unique()), sep=' ')
@@ -133,7 +134,41 @@ class StructureOptimizer:
             status = rsp['status']
             sim_values = rsp['values'] if status == STATUS_OK else sim_values
             # Save times
-            self._save_times(exec_times, trial_stg, self.temp_output)
+            cm._save_times(exec_times, trial_stg, self.temp_output)
+            # Optimizer results
+            rsp = self._define_response(trial_stg, status, sim_values)
+            # reinstate log
+            self.log = copy.deepcopy(self.org_log)
+            self.log_train = copy.deepcopy(self.org_log_train)
+            self.log_valdn = copy.deepcopy(self.org_log_valdn)
+            print("-- End of trial --")
+            return rsp
+        
+        def exec_pipeline_petri_nets(trial_stg):
+            trial_stg = {**trial_stg, **self.settings}
+            print('train split:', len(pd.DataFrame(self.log_train.data).caseid.unique()),
+                  ', valdn split:', len(pd.DataFrame(self.log_valdn).caseid.unique()), sep=' ')
+            # Vars initialization
+            status = STATUS_OK
+            exec_times = dict()
+            sim_values = []
+            # Path redefinition
+            rsp = self._temp_path_redef(trial_stg, status=status, log_time=exec_times)
+            status = rsp['status']
+            trial_stg = rsp['values'] if status == STATUS_OK else trial_stg
+            # Structure mining
+            rsp = self._mine_structure(trial_stg, status=status, log_time=exec_times)
+            status = rsp['status']
+            # Parameters extraction
+            rsp = self._extract_parameters(trial_stg, rsp['values'], copy.deepcopy(parameters),
+                                           status=status, log_time=exec_times)
+            status = rsp['status']
+            # Simulate model
+            rsp = self._simulate(trial_stg, exp_reps, self.log_valdn, status=status, log_time=exec_times)
+            status = rsp['status']
+            sim_values = rsp['values'] if status == STATUS_OK else sim_values
+            # Save times
+            cm._save_times(exec_times, trial_stg, self.temp_output)
             # Optimizer results
             rsp = self._define_response(trial_stg, status, sim_values)
             # reinstate log
@@ -143,13 +178,30 @@ class StructureOptimizer:
             print("-- End of trial --")
             return rsp
 
-        # Optimize
-        best = fmin(fn=exec_pipeline,
-                    space=self.space,
-                    algo=tpe.suggest,
-                    max_evals=max_eval,
-                    trials=self.bayes_trials,
-                    show_progressbar=False)
+        if self.discovery_method == 'simulation':
+
+            # Optimize
+            best = fmin(fn=exec_pipeline_simulation,
+                        space=self.space,
+                        algo=tpe.suggest,
+                        max_evals=max_eval,
+                        trials=self.bayes_trials,
+                        show_progressbar=False)
+            
+        elif self.discovery_method == 'petri_nets':
+
+            # Optimize
+            best = fmin(fn=exec_pipeline_petri_nets,
+                        space=self.space,
+                        algo=tpe.suggest,
+                        max_evals=max_eval,
+                        trials=self.bayes_trials,
+                        show_progressbar=False)
+            
+        else:
+            print('Incorrect discovery method argument')
+
+
         # Save results
         try:
             results = (pd.DataFrame(self.bayes_trials.results).sort_values('loss', ascending=True))
@@ -258,87 +310,6 @@ class StructureOptimizer:
             sim_values = list(itertools.chain(*p.get()))
         return sim_values
 
-    @staticmethod
-    def read_stats(args):
-        def read(settings, rep):
-            """Reads the simulation results stats
-            Args:
-                settings (dict): Path to jar and file names
-                rep (int): repetition number
-            """
-            m_settings = dict()
-            m_settings['output'] = settings['output']
-            m_settings['file'] = os.path.basename(settings['file'])
-            column_names = {'resource': 'user'}
-            m_settings['read_options'] = settings['read_options']
-            m_settings['read_options']['timeformat'] = '%Y-%m-%d %H:%M:%S.%f'
-            m_settings['read_options']['column_names'] = column_names
-
-            temp = lr.LogReader(os.path.join(
-                m_settings['output'], 'sim_data',
-                m_settings['file'].split('.')[0] + '_' + str(rep + 1) + '.csv'),
-                m_settings['read_options'],
-                verbose=False)
-            temp = pd.DataFrame(temp.data)
-            temp.rename(columns={'user': 'resource'}, inplace=True)
-            temp['role'] = temp['resource']
-            temp['source'] = 'simulation'
-            temp['run_num'] = rep + 1
-            temp = temp[~temp.task.isin(['Start', 'End'])]
-            return temp
-
-        return read(*args)
-
-    @staticmethod
-    def evaluate_logs(args):
-        def evaluate(settings, data, sim_log):
-            """Reads the simulation results stats
-            Args:
-                settings (dict): Path to jar and file names
-                rep (int): repetition number
-            """
-            rep = (sim_log.iloc[0].run_num)
-            sim_values = list()
-            evaluator = sim.SimilarityEvaluator(
-                data,
-                sim_log,
-                settings,
-                max_cases=1000)
-            evaluator.measure_distance('dl')
-            sim_values.append({**{'run_num': rep}, **evaluator.similarity})
-            return sim_values
-
-        return evaluate(*args)
-
-    @staticmethod
-    def execute_simulator(args):
-        def sim_call(settings, rep):
-            """Executes BIMP Simulations.
-            Args:
-                settings (dict): Path to jar and file names
-                rep (int): repetition number
-            """
-            file_name = os.path.basename(settings['file']).split('.')[0]
-            arguments = ['java', '-jar', settings['bimp_path'],
-                         os.path.join(settings['output'], f'{file_name}{Fe.BPMN}'),
-                         '-csv',
-                         os.path.join(settings['output'], 'sim_data', f'{file_name}_{rep + 1}{Fe.CSV}')]
-            subprocess.run(arguments, check=True, stdout=subprocess.PIPE)
-
-        sim_call(*args)
-
-    @staticmethod
-    def _save_times(times, settings, temp_output):
-        if times:
-            times = [{**{'output': settings['output']}, **times}]
-            log_file = os.path.join(temp_output, 'execution_times.csv')
-            if not os.path.exists(log_file):
-                open(log_file, 'w').close()
-            if os.path.getsize(log_file) > 0:
-                sup.create_csv_file(times, log_file, mode='a')
-            else:
-                sup.create_csv_file_header(times, log_file)
-
     def _define_response(self, settings, status, sim_values, **kwargs) -> None:
         response = dict()
         measurements = list()
@@ -405,41 +376,79 @@ class StructureOptimizer:
         valdn = pd.DataFrame(valdn)
         train = pd.DataFrame(train)
         # If the log is big sample train partition
-        train = self._sample_log(train)
+        train = cm._sample_log(train)
         # Save partitions
         self.log_valdn = (valdn.sort_values(key, ascending=True)
                           .reset_index(drop=True))
         self.log_train = copy.deepcopy(self.log)
         self.log_train.set_data(train.sort_values(key, ascending=True)
                                 .reset_index(drop=True).to_dict('records'))
+    
+    @staticmethod
+    def execute_simulator(args):
+        def sim_call(settings, rep):
+            """Executes BIMP Simulations.
+            Args:
+                settings (dict): Path to jar and file names
+                rep (int): repetition number
+            """
+            file_name = os.path.basename(settings['file']).split('.')[0]
+            arguments = ['java', '-jar', settings['bimp_path'],
+                            os.path.join(settings['output'], f'{file_name}{Fe.BPMN}'),
+                            '-csv',
+                            os.path.join(settings['output'], 'sim_data', f'{file_name}_{rep + 1}{Fe.CSV}')]
+            subprocess.run(arguments, check=True, stdout=subprocess.PIPE)
+
+        sim_call(*args)
 
     @staticmethod
-    def _sample_log(train):
-
-        def sample_size(p_size, c_level, c_interval):
+    def read_stats(args):
+        def read(settings, rep):
+            """Reads the simulation results stats
+            Args:
+                settings (dict): Path to jar and file names
+                rep (int): repetition number
             """
-            p_size : population size.
-            c_level : confidence level.
-            c_interval : confidence interval.
-            """
-            c_level_constant = {50: .67, 68: .99, 90: 1.64, 95: 1.96, 99: 2.57}
-            Z = 0.0
-            p = 0.5
-            e = c_interval / 100.0
-            N = p_size
-            n_0 = 0.0
-            n = 0.0
-            # DEVIATIONS FOR THAT CONFIDENCE LEVEL
-            Z = c_level_constant[c_level]
-            # CALC SAMPLE SIZE
-            n_0 = ((Z ** 2) * p * (1 - p)) / (e ** 2)
-            # ADJUST SAMPLE SIZE FOR FINITE POPULATION
-            n = n_0 / (1 + ((n_0 - 1) / float(N)))
-            return int(math.ceil(n))  # THE SAMPLE SIZE
+            m_settings = dict()
+            m_settings['output'] = settings['output']
+            m_settings['file'] = os.path.basename(settings['file'])
+            column_names = {'resource': 'user'}
+            m_settings['read_options'] = settings['read_options']
+            m_settings['read_options']['timeformat'] = '%Y-%m-%d %H:%M:%S.%f'
+            m_settings['read_options']['column_names'] = column_names
 
-        cases = list(train.caseid.unique())
-        if len(cases) > 1000:
-            sample_sz = sample_size(len(cases), 95.0, 3.0)
-            scases = random.sample(cases, sample_sz)
-            train = train[train.caseid.isin(scases)]
-        return train
+            temp = lr.LogReader(os.path.join(
+                m_settings['output'], 'sim_data',
+                m_settings['file'].split('.')[0] + '_' + str(rep + 1) + '.csv'),
+                m_settings['read_options'],
+                verbose=False)
+            temp = pd.DataFrame(temp.data)
+            temp.rename(columns={'user': 'resource'}, inplace=True)
+            temp['role'] = temp['resource']
+            temp['source'] = 'simulation'
+            temp['run_num'] = rep + 1
+            temp = temp[~temp.task.isin(['Start', 'End'])]
+            return temp
+
+        return read(*args)
+    
+    @staticmethod
+    def evaluate_logs(args):
+        def evaluate(settings, data, sim_log):
+            """Reads the simulation results stats
+            Args:
+                settings (dict): Path to jar and file names
+                rep (int): repetition number
+            """
+            rep = (sim_log.iloc[0].run_num)
+            sim_values = list()
+            evaluator = sim.SimilarityEvaluator(
+                data,
+                sim_log,
+                settings,
+                max_cases=1000)
+            evaluator.measure_distance('dl')
+            sim_values.append({**{'run_num': rep}, **evaluator.similarity})
+            return sim_values
+
+        return evaluate(*args)
