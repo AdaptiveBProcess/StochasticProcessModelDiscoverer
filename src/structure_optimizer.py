@@ -145,38 +145,7 @@ class StructureOptimizer:
             return rsp
         
         def exec_pipeline_petri_nets(trial_stg):
-            trial_stg = {**trial_stg, **self.settings}
-            print('train split:', len(pd.DataFrame(self.log_train.data).caseid.unique()),
-                  ', valdn split:', len(pd.DataFrame(self.log_valdn).caseid.unique()), sep=' ')
-            # Vars initialization
-            status = STATUS_OK
-            exec_times = dict()
-            sim_values = []
-            # Path redefinition
-            rsp = self._temp_path_redef(trial_stg, status=status, log_time=exec_times)
-            status = rsp['status']
-            trial_stg = rsp['values'] if status == STATUS_OK else trial_stg
-            # Structure mining
-            rsp = self._mine_structure(trial_stg, status=status, log_time=exec_times)
-            status = rsp['status']
-            # Parameters extraction
-            rsp = self._extract_parameters(trial_stg, rsp['values'], copy.deepcopy(parameters),
-                                           status=status, log_time=exec_times)
-            status = rsp['status']
-            # Simulate model
-            rsp = self._simulate(trial_stg, exp_reps, self.log_valdn, status=status, log_time=exec_times)
-            status = rsp['status']
-            sim_values = rsp['values'] if status == STATUS_OK else sim_values
-            # Save times
-            cm._save_times(exec_times, trial_stg, self.temp_output)
-            # Optimizer results
-            rsp = self._define_response(trial_stg, status, sim_values)
-            # reinstate log
-            self.log = copy.deepcopy(self.org_log)
-            self.log_train = copy.deepcopy(self.org_log_train)
-            self.log_valdn = copy.deepcopy(self.org_log_valdn)
-            print("-- End of trial --")
-            return rsp
+            return trial_stg
 
         if self.discovery_method == 'simulation':
 
