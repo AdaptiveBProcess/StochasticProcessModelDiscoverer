@@ -143,7 +143,7 @@ class StructureOptimizer:
             self.log_valdn = copy.deepcopy(self.org_log_valdn)
             print("-- End of trial --")
             return rsp
-        
+
         def exec_pipeline_petri_nets(trial_stg):
             return trial_stg
 
@@ -156,7 +156,7 @@ class StructureOptimizer:
                         max_evals=max_eval,
                         trials=self.bayes_trials,
                         show_progressbar=False)
-            
+
         elif self.discovery_method == 'petri_nets':
 
             # Optimize
@@ -166,10 +166,9 @@ class StructureOptimizer:
                         max_evals=max_eval,
                         trials=self.bayes_trials,
                         show_progressbar=False)
-            
-        else:
-            print('Incorrect discovery method argument')
 
+        else:
+            raise ValueError('Incorrect discovery method argument')
 
         # Save results
         try:
@@ -266,7 +265,7 @@ class StructureOptimizer:
         pbar_async(p, 'reading simulated logs:')
         # Evaluate
         args = [(settings, data, log) for log in p.get()]
-        
+
         if len(self.log_valdn.caseid.unique()) > 1000:
             pool.close()
             results = [self.evaluate_logs(arg) for arg in tqdm(args, 'evaluating results:')]
@@ -354,7 +353,7 @@ class StructureOptimizer:
         self.log_train = copy.deepcopy(self.log)
         self.log_train.set_data(train.sort_values(key, ascending=True)
                                 .reset_index(drop=True).to_dict('records'))
-    
+
     @staticmethod
     def execute_simulator(args):
         def sim_call(settings, rep):
@@ -365,9 +364,9 @@ class StructureOptimizer:
             """
             file_name = os.path.basename(settings['file']).split('.')[0]
             arguments = ['java', '-jar', settings['bimp_path'],
-                            os.path.join(settings['output'], f'{file_name}{Fe.BPMN}'),
-                            '-csv',
-                            os.path.join(settings['output'], 'sim_data', f'{file_name}_{rep + 1}{Fe.CSV}')]
+                         os.path.join(settings['output'], f'{file_name}{Fe.BPMN}'),
+                         '-csv',
+                         os.path.join(settings['output'], 'sim_data', f'{file_name}_{rep + 1}{Fe.CSV}')]
             print(arguments)
             subprocess.run(arguments, check=True, stdout=subprocess.PIPE)
 
@@ -403,7 +402,7 @@ class StructureOptimizer:
             return temp
 
         return read(*args)
-    
+
     @staticmethod
     def evaluate_logs(args):
         def evaluate(settings, data, sim_log):
