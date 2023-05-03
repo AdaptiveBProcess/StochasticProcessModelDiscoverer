@@ -21,15 +21,17 @@ def main():
     pass
 
 
+
 @main.command('discover')
 @click.option('--file', default=None, required=True, type=str)
 @click.option('--evaluate/--no-evaluate', default=True, required=False, type=bool)
 @click.option('--mining_alg', default=Sm.SM_V1, required=False, type=click.Choice(Sm().get_methods()))
 @click.option('--exp_reps', default=5, required=False, type=int)
-@click.option('--s_gen_max_eval', default=30, required=False, type=int)
+@click.option('--s_gen_max_eval', default=10, required=False, type=int)
 @click.option('--discovery_method', default='simulation', required=False, type=str)
 
 def discover_model(file, evaluate, mining_alg, exp_reps, s_gen_max_eval, discovery_method):
+
     params = {'file': file, 'evaluate': evaluate, 'mining_alg': mining_alg, 'discovery_method':discovery_method}
     params = read_properties(params)
     # Sequences generator
@@ -63,12 +65,15 @@ def generate_sequences(generative_model, evaluate, num_inst, exp_reps):
 
 def read_properties(params):
     """ Sets the app general params"""
-    properties_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'properties.yml')
+    properties_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'properties.yml')
     with open(properties_path, 'r') as f:
         properties = yaml.load(f, Loader=yaml.FullLoader)
     if properties is None:
         raise ValueError('Properties is empty')
-    paths = {k: os.path.join(*path.split('\\')) for k, path in properties.pop('paths').items()}
+    
+    root = os.sep.join(os.path.join(os.path.dirname(__file__), 'pipeline.py').split('\\')[:-2])
+
+    paths = {k: os.path.join(root, *path.split('\\')) for k, path in properties.pop('paths').items()}
     params = {**params, **properties, **paths}
     return params
 

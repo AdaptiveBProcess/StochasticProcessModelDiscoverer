@@ -1,0 +1,19 @@
+read_options:
+  timeformat: "%Y-%m-%dT%H:%M:%S.%f"
+  column_names:
+    'Case ID': caseid
+    'Activity': task
+    'lifecycle:transition': event_type
+    'Resource': user
+  one_timestamp: false
+  filter_d_attrib: true
+paths:
+  output_path: output_files
+  sm1_path: external_tools\splitminer\splitminer.jar
+  sm2_path: external_tools\splitminer2\sm2.jar
+  sm3_path: external_tools\splitminer3\bpmtk.jar
+  bimp_path: external_tools\bimp\qbp-simulator-engine.jar
+  align_path: external_tools\proconformance\ProConformance2.jar
+simulator: bimp
+
+

@@ -297,6 +297,7 @@ class StructureOptimizer:
         pbar_async(p, 'reading simulated logs:')
         # Evaluate
         args = [(settings, data, log) for log in p.get()]
+        
         if len(self.log_valdn.caseid.unique()) > 1000:
             pool.close()
             results = [self.evaluate_logs(arg) for arg in tqdm(args, 'evaluating results:')]
@@ -308,6 +309,7 @@ class StructureOptimizer:
             pool.close()
             # Save results
             sim_values = list(itertools.chain(*p.get()))
+
         return sim_values
 
     def _define_response(self, settings, status, sim_values, **kwargs) -> None:
@@ -397,6 +399,7 @@ class StructureOptimizer:
                             os.path.join(settings['output'], f'{file_name}{Fe.BPMN}'),
                             '-csv',
                             os.path.join(settings['output'], 'sim_data', f'{file_name}_{rep + 1}{Fe.CSV}')]
+            print(arguments)
             subprocess.run(arguments, check=True, stdout=subprocess.PIPE)
 
         sim_call(*args)

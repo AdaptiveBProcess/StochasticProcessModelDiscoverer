@@ -18,7 +18,7 @@ class LogReplayer:
     """
 
     def __init__(self, model, log, settings, msg='',
-                 source='log', run_num=0, verbose=True, mode='multi', st=True):
+                 source='log', run_num=0, verbose=True, mode='seq', st=True):
         """constructor"""
         self.source = source
         self.run_num = run_num

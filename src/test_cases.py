@@ -28,14 +28,12 @@ def load_event_log(output_path):
             print(e)
         return 0
     
-logs_name = ['TestEventLog3.xes']
+log_names = ['TestEventLog1.xes']
 
-for log_name in logs_name:
-    #try:
-    
-    test_event_log = os.path.join('..', 'input_files', 'test_event_logs', log_name) 
+for log_name in log_names:
+    test_event_log = os.path.join('input_files', 'test_event_logs', log_name) 
     runner = CliRunner()
-    result = runner.invoke(main, ['discover', '--file', test_event_log])
+    result = runner.invoke(main, ['discover', '--file', test_event_log, '--exp_reps', 1, '--s_gen_max_eval', 2])
 
     if result.exit_code == 0:
         output_path = result.output.split('\n')[-4]
