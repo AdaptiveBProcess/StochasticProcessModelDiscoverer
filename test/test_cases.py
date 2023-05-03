@@ -16,7 +16,6 @@ class TestLogReader(TestCase):
         ['TestEventLog3.xes', 1, 1]
     ])
 
-    @staticmethod
     def load_bpmn(self, output_path):
         bpmn_files = [x for x in glob(os.path.join(output_path, '*.bpmn'))]
         try:
