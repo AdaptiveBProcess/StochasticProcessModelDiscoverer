@@ -17,6 +17,35 @@ pipeline {
     }
 
     stages{
+        stage('Build Test Image'){
+            steps{
+                ansiColor('xterm'){
+                    script{
+                        docker.build(
+                            "python:3.8-slim",
+                            "--pull -f baseimage/Dockerfile ."
+                        )
+                    }
+                }
+            }
+        }
+
+        stage('Run Tests'){
+            steps {
+                ansiColor('xterm') {
+                    script{
+                        docker.image("python:3.8-slim").inside(){
+                            sh '''#!/usr/bin/env bash
+                            pip install --user -r requirements.txt
+                            pip install --user -r tests/requirements.txt
+                            export PYTHONPATH=test:src
+                            python -m pytest --cov-report=xml:coverage.xml --cov=src -vv test'''
+                        }
+                    }
+                }
+            }
+        }
+
         stage('PR SonarQube analysis') {
             when { changeRequest() }
             steps {
@@ -29,7 +58,8 @@ pipeline {
                             sh '''${SONAR_QUBE_SCANNER} \
                                 -Dsonar.pullrequest.key=${CHANGE_ID} \
                                 -Dsonar.pullrequest.branch=${CHANGE_BRANCH} \
-                                -Dsonar.pullrequest.base=${CHANGE_TARGET}'''
+                                -Dsonar.pullrequest.base=${CHANGE_TARGET} \
+                                -Dsonar.python.coverage.reportPaths=coverage.xml'''
                         }
                     }
                 }
@@ -45,7 +75,8 @@ pipeline {
                         withSonarQubeEnv('SonarCloud')
                         {
                             sh '''${SONAR_QUBE_SCANNER} \
-                                -Dsonar.branch.name=${BRANCH_NAME}'''
+                                -Dsonar.branch.name=${BRANCH_NAME} \
+                                -Dsonar.python.coverage.reportPaths=coverage.xml'''
                         }
                     }
                 }
@@ -62,7 +93,8 @@ pipeline {
                         {
                             sh '''${SONAR_QUBE_SCANNER} \
                                 -Dsonar.branch.name=${BRANCH_NAME} \
-                                -Dsonar.branch.target=${MAIN_BRANCH}'''
+                                -Dsonar.branch.target=${MAIN_BRANCH} \
+                                -Dsonar.python.coverage.reportPaths=coverage.xml'''
                         }
                     }
                 }
@@ -79,7 +111,8 @@ pipeline {
                         {
                             sh '''${SONAR_QUBE_SCANNER} \
                                 -Dsonar.branch.name=${BRANCH_NAME} \
-                                -Dsonar.branch.target=${BRANCH_NAME}'''
+                                -Dsonar.branch.target=${BRANCH_NAME} \
+                                -Dsonar.python.coverage.reportPaths=coverage.xml'''
                         }
                     }
                 }
