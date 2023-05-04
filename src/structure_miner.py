@@ -61,6 +61,7 @@ class StructureMiner:
                      self.xes_file,
                      os.path.join(self.settings['output'], self.file_name),
                      str(self.settings['concurrency'])])
+
         subprocess.call(args)
 
     def _sm1_miner(self) -> None:
@@ -71,6 +72,7 @@ class StructureMiner:
                 str(self.settings['epsilon']), str(self.settings['eta']),
                 self.xes_file,
                 os.path.join(self.settings['output'], self.file_name)]
+
         subprocess.call(args)
 
     def _sm3_miner(self) -> None:
@@ -89,6 +91,7 @@ class StructureMiner:
                      'false', 'false', 'false',
                      self.xes_file,
                      os.path.join(self.settings['output'], self.file_name)])
+
         subprocess.call(args)
 
     def _evaluate_alignment(self) -> None:

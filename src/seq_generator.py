@@ -163,6 +163,7 @@ class StochasticProcessModelGenerator(SeqGenerator):
     def _execute_simulator(bimp_path, temp_path, model):
         sim_log = os.path.join(temp_path, sup.file_id('SIM_'))
         args = ['java', '-jar', bimp_path, model, '-csv', sim_log]
+
         subprocess.run(args, check=True, stdout=subprocess.PIPE)
         return sim_log
 

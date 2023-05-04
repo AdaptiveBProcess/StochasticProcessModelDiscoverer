@@ -259,6 +259,7 @@ class TimeTablesCreator:
         args = ['java', '-jar', calendar_path, file, sup, conf, str(mode)]
         if not file_name is None:
             args.append(file_name)
+        
         process = subprocess.run(args, check=True, stdout=subprocess.PIPE)
         found = False
         xml = ['<qbp:timetables xmlns:qbp="http://www.qbp-simulator.com/Schema201212">']
