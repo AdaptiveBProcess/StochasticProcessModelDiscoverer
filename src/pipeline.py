@@ -20,8 +20,6 @@ def main():
     # This is a main group which includes other commands specified below.
     pass
 
-
-
 @main.command('discover')
 @click.option('--file', default=None, required=True, type=str)
 @click.option('--evaluate/--no-evaluate', default=True, required=False, type=bool)

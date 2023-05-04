@@ -8,7 +8,6 @@ from parameterized import parameterized
 
 from src.pipeline import main
 
-
 class TestLogReader(TestCase):
 
     @staticmethod
