@@ -43,7 +43,7 @@ class TestLogReader(TestCase):
     ])
     def test_executions(self, log_name, exp_reps, s_gen_max_eval):
         # given
-        test_event_log = os.path.join('input_files', 'test_event_logs', log_name)
+        test_event_log = os.path.join('test', 'fixes', 'test_event_logs', log_name)
         runner = CliRunner()
 
         # when
