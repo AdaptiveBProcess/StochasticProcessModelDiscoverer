@@ -367,7 +367,7 @@ class StructureOptimizer:
                          os.path.join(settings['output'], f'{file_name}{Fe.BPMN}'),
                          '-csv',
                          os.path.join(settings['output'], 'sim_data', f'{file_name}_{rep + 1}{Fe.CSV}')]
-            print(arguments)
+
             subprocess.run(arguments, check=True, stdout=subprocess.PIPE)
 
         sim_call(*args)

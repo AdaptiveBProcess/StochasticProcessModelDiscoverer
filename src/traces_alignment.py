@@ -223,7 +223,7 @@ class TracesAligner(object):
                      self.file_name + '.xes',
                      self.file_name + '.bpmn',
                      'true'])
-        print(args)
+
         subprocess.call(args, bufsize=-1)
 
     # =============================================================================
