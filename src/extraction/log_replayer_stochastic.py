@@ -76,11 +76,11 @@ class LogReplayerS:
         for key in branching_probs.keys():
             branchings = {}
             for sequence_flow in sequence_flows:
-                id = sequence_flow.get('id')
+                id_branch = sequence_flow.get('id')
                 source_ref = sequence_flow.get('sourceRef')
                 for task_id in branching_probs[key].keys():
                     if task_id == source_ref:
-                        branchings[id] = branching_probs[key][task_id]/sum(branching_probs[key].values())
+                        branchings[id_branch] = branching_probs[key][task_id]/sum(branching_probs[key].values())
             new_branching_probs[key] = branchings
         
         self.branching_probs = new_branching_probs
