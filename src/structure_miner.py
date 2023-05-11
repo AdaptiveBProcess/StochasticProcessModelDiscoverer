@@ -97,6 +97,7 @@ class StructureMiner:
     def _evaluate_alignment(self) -> None:
         # load bpmn model
         self.bpmn = br.BpmnReader(self.bpmn_file)
+        
         self.process_graph = gph.create_process_structure(self.bpmn)
         # Evaluate alignment
         chk.evaluate_alignment(self.process_graph, self.log, self.settings)

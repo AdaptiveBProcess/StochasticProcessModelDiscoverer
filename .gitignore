@@ -1,6 +1,7 @@
 *.pyc
 .idea/*
 .idea/*.*
+input_files/*
 output_files/*
 src/sp_model_discoverer.egg-info/*
 *.ipynb

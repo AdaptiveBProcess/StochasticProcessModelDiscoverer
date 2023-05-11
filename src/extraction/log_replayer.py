@@ -9,7 +9,8 @@ import utils.support as sup
 
 from collections import OrderedDict
 from tqdm import tqdm
-
+import json
+import pickle
 
 class LogReplayer:
     """
@@ -24,6 +25,7 @@ class LogReplayer:
         self.run_num = run_num
         self.one_timestamp = settings['read_options']['one_timestamp']
         self.model = model
+        
         self.m_data = pd.DataFrame.from_dict(dict(model.nodes.data()),
                                              orient='index')
         self.msg = msg
