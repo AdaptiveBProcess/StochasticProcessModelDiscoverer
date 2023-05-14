@@ -1,11 +1,11 @@
 import networkx as nx
-import matplotlib.pyplot as plt
 import pandas as pd
 import itertools
 
 import warnings
 warnings.filterwarnings('ignore')
 
+from tqdm import tqdm
 
 class LogReplayerS:
     def __init__(self, bpmn, model, log) -> None:
@@ -15,54 +15,44 @@ class LogReplayerS:
         self.m_data = pd.DataFrame.from_dict(dict(model.nodes.data()),
                                              orient='index')
         self.index_ac = self.m_data['name'].to_dict()
-        
-        self.df_log = pd.DataFrame([item for sublist in log.get_traces() for item in sublist])
-        self.index_ac = self.m_data['name'].to_dict()
+        self.df_log = pd.DataFrame([item for sublist in self.log.get_traces() for item in sublist])
         self.index_id = self.m_data['id'].to_dict()
         self.ac_index = {self.index_ac[key]:key for key in self.index_ac}
         self.find_branches()
         self.count_branc_cases()
 
     def find_branches(self):
-        self.branch_nodes = []
+        branch_nodes = []
         for node in self.model.nodes():
             out_edges = list(self.model.out_edges(node))
             in_edges = list(self.model.in_edges(node))
             if len(out_edges) > 1:
                 path = [(in_edges[0][0], x[1]) for x in out_edges]
-                self.branch_nodes += path
+                branch_nodes += path
+
+        self.branch_nodes = [(self.index_ac[x[0]], self.index_ac[x[1]]) for x in branch_nodes]
 
     @staticmethod
-    def evaluate_condition(df_case, ac_index, act_path):
-        df_case.is_copy = False
-        df_case.loc[:, 'rank'] = df_case.groupby('caseid')['start_timestamp'].rank().astype(int).values
-        df_case = df_case.sort_values(by='rank')
-        u_tasks = [x for x in df_case['task'].drop_duplicates()]
-        
-        G = nx.DiGraph()
-        for task in [ac_index[x] for x in u_tasks]:
-            G.add_node(task)
-
-        tasks = [ac_index[x] for x in list(df_case['task'])]
-        if list(df_case['rank']) == list(set(list(df_case['rank']))):
-            order = [(x[0], x[1]) for x in [(a, b) for a, b in zip(tasks[:-1], tasks[1:])]]
-        else:
-            order = []
-            for i in range(1, len(df_case['rank'])):
-                c_task = list(df_case[df_case['rank']==i]['task'])
-                n_task = list(df_case[df_case['rank']==i+1]['task'])
-                order += [(x[0], x[1]) for x in list(itertools.product(c_task, n_task))]
-
-        G.add_edges_from(order)
-        cond = 1 if nx.is_simple_path(G, act_path) else 0
-        return cond
+    def evaluate_condition(activities, nodes):
+        second_index = 0
+        for activity in activities:
+            if activity == nodes[second_index]:
+                second_index += 1
+                if second_index == len(nodes):
+                    return 1
+        return 0
     
     def count_branc_cases(self):
+        print('Counting branch cases...')
         branching_probs_idx = {}
-        for case in self.df_log['caseid'].drop_duplicates():
-            df_case = self.df_log[self.df_log['caseid']==case]
+        self.df_log = self.df_log.sort_values(by=['caseid', 'start_timestamp'])
+        cases = self.df_log.groupby('caseid')['task'].apply(list).to_dict()
+        for case in tqdm(cases.keys()):
+            seq = cases[case]
             for branch in self.branch_nodes:
-                branching_probs_idx[branch] = branching_probs_idx.get(branch, 0) + self.evaluate_condition(df_case, self.ac_index, branch)
+                branching_probs_idx[branch] = branching_probs_idx.get(branch, 0) + self.evaluate_condition(seq, branch)
+
+        branching_probs_idx = {(self.ac_index[key[0]], self.ac_index[key[1]]):value for key, value in branching_probs_idx.items()}
 
         branching_probs = {}
         for key in branching_probs_idx.keys():
@@ -77,10 +67,10 @@ class LogReplayerS:
             branchings = {}
             for sequence_flow in sequence_flows:
                 id_branch = sequence_flow.get('id')
-                source_ref = sequence_flow.get('sourceRef')
+                source_ref = sequence_flow.get('targetRef')
                 for task_id in branching_probs[key].keys():
                     if task_id == source_ref:
-                        branchings[id_branch] = branching_probs[key][task_id]/sum(branching_probs[key].values())
+                        branchings[id_branch] = round(branching_probs[key][task_id]/sum(branching_probs[key].values()), 2)
             new_branching_probs[key] = branchings
         
         self.branching_probs = new_branching_probs
