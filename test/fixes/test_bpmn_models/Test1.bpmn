@@ -1,0 +1,350 @@
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" targetNamespace="http://www.omg.org/bpmn20" exporter="ProM. http://www.promtools.org/prom6" exporterVersion="6.3" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd"><process id="proc_1700729">
+<startEvent id="node_371807c4-d3da-47a8-962a-f067d5621bdf" name=""/>
+<endEvent id="node_3194e9f6-9330-4054-b3b5-14775ef11b6f" name=""/>
+<task id="node_e6d9e2a8-f2e4-40ac-bc22-5f9ff9b48305" name="Task 7">
+<standardLoopCharacteristics testBefore="false"/>
+</task>
+<task id="node_5807ae2b-205b-4663-baff-dfeaa13023c7" name="Task 6">
+<standardLoopCharacteristics testBefore="false"/>
+</task>
+<task id="node_4a231356-48e0-4ef7-87f9-e2d94377336f" name="Task 1">
+<standardLoopCharacteristics testBefore="false"/>
+</task>
+<task id="node_30ae0db5-8a82-4462-aae3-69d625b3e532" name="Task 2">
+<standardLoopCharacteristics testBefore="false"/>
+</task>
+<task id="node_841a3bf0-4c55-475b-a0dc-484393b4795b" name="End">
+<standardLoopCharacteristics testBefore="false"/>
+</task>
+<task id="node_24f963f6-f5f7-418e-9b7e-13ec8581ab86" name="Task 8">
+<standardLoopCharacteristics testBefore="false"/>
+</task>
+<task id="node_c2e15d03-a671-4794-9a6d-589a436ce203" name="Task 3">
+<standardLoopCharacteristics testBefore="false"/>
+</task>
+<task id="node_7341e489-1b70-4d00-91c7-4800450ea863" name="Task 9">
+<standardLoopCharacteristics testBefore="false"/>
+</task>
+<task id="node_cb19b8f8-53ca-4920-97d1-409e307ba897" name="Task 5">
+<standardLoopCharacteristics testBefore="false"/>
+</task>
+<task id="node_145bc327-da03-4c9f-b8c4-d9744d040f1f" name="Start">
+<standardLoopCharacteristics testBefore="false"/>
+</task>
+<task id="node_378b2ecc-faae-4f50-8f96-0b9a6d01b0a2" name="Task 4">
+<standardLoopCharacteristics testBefore="false"/>
+</task>
+<exclusiveGateway id="node_da8afe4e-1c5e-4ba5-a508-9f881f07a296" name="" gatewayDirection="Diverging">
+<incoming>
+node_9ca5a172-8597-4b70-812b-c84ebd82c695</incoming>
+<outgoing>
+node_6c6575fc-b066-4ead-b0a9-23c49a802698</outgoing>
+<outgoing>
+node_59d36866-e2b9-4a5b-8b72-2841af524125</outgoing>
+</exclusiveGateway>
+<exclusiveGateway id="node_f7ccd5b7-3060-42ed-b922-309b0cbba8e7" name="" gatewayDirection="Diverging">
+<incoming>
+node_5890a6bc-c26a-44b9-97e2-ddbd142dab50</incoming>
+<outgoing>
+node_295466ee-f0ac-46e4-ab0a-14177fa2fb28</outgoing>
+<outgoing>
+node_b1f732ca-f378-4a71-9142-2543e5f7f050</outgoing>
+</exclusiveGateway>
+<exclusiveGateway id="node_7cdd01d5-3642-4319-b281-779144ccb7a3" name="" gatewayDirection="Converging">
+<incoming>
+node_444a10be-4ef9-4fbf-adaa-11ed1a8664cd</incoming>
+<incoming>
+node_25216aa5-2b7d-4add-836f-a665ca13195e</incoming>
+<outgoing>
+node_d4865c5f-1532-45a6-bd4f-ed3fcc5a1c71</outgoing>
+</exclusiveGateway>
+<exclusiveGateway id="node_47fcbc08-8d4e-47f6-9656-c09aba9336bd" name="" gatewayDirection="Converging">
+<incoming>
+node_d40ee431-9d6f-430b-85a2-941c4a3583ac</incoming>
+<incoming>
+node_390231ee-3a18-495c-bf8e-9306f62a90ca</incoming>
+<outgoing>
+node_25216aa5-2b7d-4add-836f-a665ca13195e</outgoing>
+</exclusiveGateway>
+<sequenceFlow id="node_8ded0f4c-505d-45be-97dd-5bdfc40d8669" name="" sourceRef="node_371807c4-d3da-47a8-962a-f067d5621bdf" targetRef="node_145bc327-da03-4c9f-b8c4-d9744d040f1f"/>
+<sequenceFlow id="node_06190567-ff18-4d70-bba9-4725d009d887" name="" sourceRef="node_378b2ecc-faae-4f50-8f96-0b9a6d01b0a2" targetRef="node_cb19b8f8-53ca-4920-97d1-409e307ba897"/>
+<sequenceFlow id="node_a1ffebe6-51ef-4bc9-a8d1-021c6fe6f95c" name="" sourceRef="node_24f963f6-f5f7-418e-9b7e-13ec8581ab86" targetRef="node_841a3bf0-4c55-475b-a0dc-484393b4795b"/>
+<sequenceFlow id="node_20f32743-9edf-4e68-8e57-035f62a2cf28" name="" sourceRef="node_145bc327-da03-4c9f-b8c4-d9744d040f1f" targetRef="node_4a231356-48e0-4ef7-87f9-e2d94377336f"/>
+<sequenceFlow id="node_e46cc2e8-e0ed-496a-b965-7cd9dd6c7772" name="" sourceRef="node_c2e15d03-a671-4794-9a6d-589a436ce203" targetRef="node_7341e489-1b70-4d00-91c7-4800450ea863"/>
+<sequenceFlow id="node_be053722-1a73-494f-8097-764f5bf128a5" name="" sourceRef="node_4a231356-48e0-4ef7-87f9-e2d94377336f" targetRef="node_30ae0db5-8a82-4462-aae3-69d625b3e532"/>
+<sequenceFlow id="node_ae5ee019-7035-4056-9deb-9a1ca0d97726" name="" sourceRef="node_841a3bf0-4c55-475b-a0dc-484393b4795b" targetRef="node_3194e9f6-9330-4054-b3b5-14775ef11b6f"/>
+<sequenceFlow id="node_9ca5a172-8597-4b70-812b-c84ebd82c695" name="" sourceRef="node_30ae0db5-8a82-4462-aae3-69d625b3e532" targetRef="node_da8afe4e-1c5e-4ba5-a508-9f881f07a296"/>
+<sequenceFlow id="node_6c6575fc-b066-4ead-b0a9-23c49a802698" name="" sourceRef="node_da8afe4e-1c5e-4ba5-a508-9f881f07a296" targetRef="node_378b2ecc-faae-4f50-8f96-0b9a6d01b0a2"/>
+<sequenceFlow id="node_59d36866-e2b9-4a5b-8b72-2841af524125" name="" sourceRef="node_da8afe4e-1c5e-4ba5-a508-9f881f07a296" targetRef="node_c2e15d03-a671-4794-9a6d-589a436ce203"/>
+<sequenceFlow id="node_5890a6bc-c26a-44b9-97e2-ddbd142dab50" name="" sourceRef="node_cb19b8f8-53ca-4920-97d1-409e307ba897" targetRef="node_f7ccd5b7-3060-42ed-b922-309b0cbba8e7"/>
+<sequenceFlow id="node_295466ee-f0ac-46e4-ab0a-14177fa2fb28" name="" sourceRef="node_f7ccd5b7-3060-42ed-b922-309b0cbba8e7" targetRef="node_e6d9e2a8-f2e4-40ac-bc22-5f9ff9b48305"/>
+<sequenceFlow id="node_b1f732ca-f378-4a71-9142-2543e5f7f050" name="" sourceRef="node_f7ccd5b7-3060-42ed-b922-309b0cbba8e7" targetRef="node_5807ae2b-205b-4663-baff-dfeaa13023c7"/>
+<sequenceFlow id="node_d40ee431-9d6f-430b-85a2-941c4a3583ac" name="" sourceRef="node_e6d9e2a8-f2e4-40ac-bc22-5f9ff9b48305" targetRef="node_47fcbc08-8d4e-47f6-9656-c09aba9336bd"/>
+<sequenceFlow id="node_390231ee-3a18-495c-bf8e-9306f62a90ca" name="" sourceRef="node_5807ae2b-205b-4663-baff-dfeaa13023c7" targetRef="node_47fcbc08-8d4e-47f6-9656-c09aba9336bd"/>
+<sequenceFlow id="node_d4865c5f-1532-45a6-bd4f-ed3fcc5a1c71" name="" sourceRef="node_7cdd01d5-3642-4319-b281-779144ccb7a3" targetRef="node_24f963f6-f5f7-418e-9b7e-13ec8581ab86"/>
+<sequenceFlow id="node_444a10be-4ef9-4fbf-adaa-11ed1a8664cd" name="" sourceRef="node_7341e489-1b70-4d00-91c7-4800450ea863" targetRef="node_7cdd01d5-3642-4319-b281-779144ccb7a3"/>
+<sequenceFlow id="node_25216aa5-2b7d-4add-836f-a665ca13195e" name="" sourceRef="node_47fcbc08-8d4e-47f6-9656-c09aba9336bd" targetRef="node_7cdd01d5-3642-4319-b281-779144ccb7a3"/>
+</process>
+<bpmndi:BPMNDiagram id="id_-1218549077">
+<bpmndi:BPMNPlane bpmnElement="proc_1700729">
+<bpmndi:BPMNShape bpmnElement="node_e6d9e2a8-f2e4-40ac-bc22-5f9ff9b48305">
+<dc:Bounds x="876.0" y="101.0" width="80.0" height="40.0"/>
+<bpmndi:BPMNLabel/>
+</bpmndi:BPMNShape>
+<bpmndi:BPMNShape bpmnElement="node_7cdd01d5-3642-4319-b281-779144ccb7a3">
+<dc:Bounds x="1081.0" y="168.5" width="25.0" height="25.0"/>
+<bpmndi:BPMNLabel/>
+</bpmndi:BPMNShape>
+<bpmndi:BPMNShape bpmnElement="node_7341e489-1b70-4d00-91c7-4800450ea863">
+<dc:Bounds x="671.0" y="200.0" width="80.0" height="40.0"/>
+<bpmndi:BPMNLabel/>
+</bpmndi:BPMNShape>
+<bpmndi:BPMNShape bpmnElement="node_5807ae2b-205b-4663-baff-dfeaa13023c7">
+<dc:Bounds x="876.0" y="171.0" width="80.0" height="40.0"/>
+<bpmndi:BPMNLabel/>
+</bpmndi:BPMNShape>
+<bpmndi:BPMNShape bpmnElement="node_47fcbc08-8d4e-47f6-9656-c09aba9336bd">
+<dc:Bounds x="1006.0" y="151.5" width="25.0" height="25.0"/>
+<bpmndi:BPMNLabel/>
+</bpmndi:BPMNShape>
+<bpmndi:BPMNShape bpmnElement="node_371807c4-d3da-47a8-962a-f067d5621bdf">
+<dc:Bounds x="1.0" y="158.5" width="25.0" height="25.0"/>
+<bpmndi:BPMNLabel/>
+</bpmndi:BPMNShape>
+<bpmndi:BPMNShape bpmnElement="node_c2e15d03-a671-4794-9a6d-589a436ce203">
+<dc:Bounds x="541.0" y="191.0" width="80.0" height="40.0"/>
+<bpmndi:BPMNLabel/>
+</bpmndi:BPMNShape>
+<bpmndi:BPMNShape bpmnElement="node_841a3bf0-4c55-475b-a0dc-484393b4795b">
+<dc:Bounds x="1286.0" y="155.0" width="80.0" height="40.0"/>
+<bpmndi:BPMNLabel/>
+</bpmndi:BPMNShape>
+<bpmndi:BPMNShape bpmnElement="node_3194e9f6-9330-4054-b3b5-14775ef11b6f">
+<dc:Bounds x="1416.0" y="162.5" width="25.0" height="25.0"/>
+<bpmndi:BPMNLabel/>
+</bpmndi:BPMNShape>
+<bpmndi:BPMNShape bpmnElement="node_4a231356-48e0-4ef7-87f9-e2d94377336f">
+<dc:Bounds x="206.0" y="151.0" width="80.0" height="40.0"/>
+<bpmndi:BPMNLabel/>
+</bpmndi:BPMNShape>
+<bpmndi:BPMNShape bpmnElement="node_378b2ecc-faae-4f50-8f96-0b9a6d01b0a2">
+<dc:Bounds x="541.0" y="121.0" width="80.0" height="40.0"/>
+<bpmndi:BPMNLabel/>
+</bpmndi:BPMNShape>
+<bpmndi:BPMNShape bpmnElement="node_145bc327-da03-4c9f-b8c4-d9744d040f1f">
+<dc:Bounds x="76.0" y="151.0" width="80.0" height="40.0"/>
+<bpmndi:BPMNLabel/>
+</bpmndi:BPMNShape>
+<bpmndi:BPMNShape bpmnElement="node_30ae0db5-8a82-4462-aae3-69d625b3e532">
+<dc:Bounds x="336.0" y="151.0" width="80.0" height="40.0"/>
+<bpmndi:BPMNLabel/>
+</bpmndi:BPMNShape>
+<bpmndi:BPMNShape bpmnElement="node_cb19b8f8-53ca-4920-97d1-409e307ba897">
+<dc:Bounds x="671.0" y="125.0" width="80.0" height="40.0"/>
+<bpmndi:BPMNLabel/>
+</bpmndi:BPMNShape>
+<bpmndi:BPMNShape bpmnElement="node_da8afe4e-1c5e-4ba5-a508-9f881f07a296">
+<dc:Bounds x="466.0" y="161.5" width="25.0" height="25.0"/>
+<bpmndi:BPMNLabel/>
+</bpmndi:BPMNShape>
+<bpmndi:BPMNShape bpmnElement="node_24f963f6-f5f7-418e-9b7e-13ec8581ab86">
+<dc:Bounds x="1156.0" y="157.0" width="80.0" height="40.0"/>
+<bpmndi:BPMNLabel/>
+</bpmndi:BPMNShape>
+<bpmndi:BPMNShape bpmnElement="node_f7ccd5b7-3060-42ed-b922-309b0cbba8e7">
+<dc:Bounds x="801.0" y="139.5" width="25.0" height="25.0"/>
+<bpmndi:BPMNLabel/>
+</bpmndi:BPMNShape>
+<bpmndi:BPMNEdge bpmnElement="node_06190567-ff18-4d70-bba9-4725d009d887">
+<di:waypoint x="581.0" y="141.0"/>
+<di:waypoint x="711.0" y="145.0"/>
+</bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge bpmnElement="node_6c6575fc-b066-4ead-b0a9-23c49a802698">
+<di:waypoint x="478.5" y="174.0"/>
+<di:waypoint x="581.0" y="141.0"/>
+</bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge bpmnElement="node_295466ee-f0ac-46e4-ab0a-14177fa2fb28">
+<di:waypoint x="813.5" y="152.0"/>
+<di:waypoint x="916.0" y="121.0"/>
+</bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge bpmnElement="node_9ca5a172-8597-4b70-812b-c84ebd82c695">
+<di:waypoint x="376.0" y="171.0"/>
+<di:waypoint x="478.5" y="174.0"/>
+</bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge bpmnElement="node_390231ee-3a18-495c-bf8e-9306f62a90ca">
+<di:waypoint x="916.0" y="191.0"/>
+<di:waypoint x="1018.5" y="164.0"/>
+</bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge bpmnElement="node_25216aa5-2b7d-4add-836f-a665ca13195e">
+<di:waypoint x="1018.5" y="164.0"/>
+<di:waypoint x="1093.5" y="181.0"/>
+</bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge bpmnElement="node_ae5ee019-7035-4056-9deb-9a1ca0d97726">
+<di:waypoint x="1326.0" y="175.0"/>
+<di:waypoint x="1428.5" y="175.0"/>
+</bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge bpmnElement="node_d4865c5f-1532-45a6-bd4f-ed3fcc5a1c71">
+<di:waypoint x="1093.5" y="181.0"/>
+<di:waypoint x="1196.0" y="177.0"/>
+</bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge bpmnElement="node_be053722-1a73-494f-8097-764f5bf128a5">
+<di:waypoint x="246.0" y="171.0"/>
+<di:waypoint x="376.0" y="171.0"/>
+</bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge bpmnElement="node_e46cc2e8-e0ed-496a-b965-7cd9dd6c7772">
+<di:waypoint x="581.0" y="211.0"/>
+<di:waypoint x="711.0" y="220.0"/>
+</bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge bpmnElement="node_59d36866-e2b9-4a5b-8b72-2841af524125">
+<di:waypoint x="478.5" y="174.0"/>
+<di:waypoint x="581.0" y="211.0"/>
+</bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge bpmnElement="node_8ded0f4c-505d-45be-97dd-5bdfc40d8669">
+<di:waypoint x="13.5" y="171.0"/>
+<di:waypoint x="116.0" y="171.0"/>
+</bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge bpmnElement="node_a1ffebe6-51ef-4bc9-a8d1-021c6fe6f95c">
+<di:waypoint x="1196.0" y="177.0"/>
+<di:waypoint x="1326.0" y="175.0"/>
+</bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge bpmnElement="node_5890a6bc-c26a-44b9-97e2-ddbd142dab50">
+<di:waypoint x="711.0" y="145.0"/>
+<di:waypoint x="813.5" y="152.0"/>
+</bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge bpmnElement="node_444a10be-4ef9-4fbf-adaa-11ed1a8664cd">
+<di:waypoint x="711.0" y="220.0"/>
+<di:waypoint x="813.5" y="241.0"/>
+<di:waypoint x="916.0" y="241.0"/>
+<di:waypoint x="1018.5" y="241.0"/>
+<di:waypoint x="1093.5" y="181.0"/>
+</bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge bpmnElement="node_b1f732ca-f378-4a71-9142-2543e5f7f050">
+<di:waypoint x="813.5" y="152.0"/>
+<di:waypoint x="916.0" y="191.0"/>
+</bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge bpmnElement="node_d40ee431-9d6f-430b-85a2-941c4a3583ac">
+<di:waypoint x="916.0" y="121.0"/>
+<di:waypoint x="1018.5" y="164.0"/>
+</bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge bpmnElement="node_20f32743-9edf-4e68-8e57-035f62a2cf28">
+<di:waypoint x="116.0" y="171.0"/>
+<di:waypoint x="246.0" y="171.0"/>
+</bpmndi:BPMNEdge>
+</bpmndi:BPMNPlane>
+</bpmndi:BPMNDiagram>
+<qbp:processSimulationInfo xmlns:qbp="http://www.qbp-simulator.com/Schema201212" id="qbp_d79d623d-527a-4c30-b9a4-2fb0c3425175" processInstances="14" startDateTime="2023-05-16T09:31:53.900999+00:00" currency="EUR">
+  <qbp:arrivalRateDistribution type="EXPONENTIAL" mean="0" arg1="7481.74" arg2="0">
+    <qbp:timeUnit>seconds</qbp:timeUnit>
+  </qbp:arrivalRateDistribution>
+  <qbp:timetables>
+    <qbp:timetable id="QBP_ARR_DEFAULT_TIMETABLE" default="true" name="24/7">
+      <qbp:rules>
+        <qbp:rule fromTime="00:00:00.000+00:00" toTime="23:59:59.999+00:00" fromWeekDay="MONDAY" toWeekDay="SUNDAY"/>
+      </qbp:rules>
+    </qbp:timetable>
+    <qbp:timetable id="QBP_RES_DEFAULT_TIMETABLE" default="false" name="24/7">
+      <qbp:rules>
+        <qbp:rule fromTime="00:00:00.000+00:00" toTime="23:59:59.999+00:00" fromWeekDay="MONDAY" toWeekDay="SUNDAY"/>
+      </qbp:rules>
+    </qbp:timetable>
+  </qbp:timetables>
+  <qbp:resources>
+    <qbp:resource id="QBP_DEFAULT_RESOURCE" name="SYSTEM" totalAmount="100000" costPerHour="20" timetableId="QBP_ARR_DEFAULT_TIMETABLE"/>
+  </qbp:resources>
+  <qbp:elements>
+    <qbp:element id="qbp_499dfd24-5d41-4e5e-bccc-bf45df7e4120" elementId="node_e6d9e2a8-f2e4-40ac-bc22-5f9ff9b48305">
+      <qbp:durationDistribution type="EXPONENTIAL" mean="0" arg1="834.04" arg2="0">
+        <qbp:timeUnit>seconds</qbp:timeUnit>
+      </qbp:durationDistribution>
+      <qbp:resourceIds>
+        <qbp:resourceId>QBP_DEFAULT_RESOURCE</qbp:resourceId>
+      </qbp:resourceIds>
+    </qbp:element>
+    <qbp:element id="qbp_a2691044-a748-4207-a19a-f9799d92ef47" elementId="node_5807ae2b-205b-4663-baff-dfeaa13023c7">
+      <qbp:durationDistribution type="EXPONENTIAL" mean="0" arg1="417.45" arg2="0">
+        <qbp:timeUnit>seconds</qbp:timeUnit>
+      </qbp:durationDistribution>
+      <qbp:resourceIds>
+        <qbp:resourceId>QBP_DEFAULT_RESOURCE</qbp:resourceId>
+      </qbp:resourceIds>
+    </qbp:element>
+    <qbp:element id="qbp_c4712d3b-7b66-421b-9edc-1d871da84131" elementId="node_4a231356-48e0-4ef7-87f9-e2d94377336f">
+      <qbp:durationDistribution type="EXPONENTIAL" mean="0" arg1="1676.7" arg2="0">
+        <qbp:timeUnit>seconds</qbp:timeUnit>
+      </qbp:durationDistribution>
+      <qbp:resourceIds>
+        <qbp:resourceId>QBP_DEFAULT_RESOURCE</qbp:resourceId>
+      </qbp:resourceIds>
+    </qbp:element>
+    <qbp:element id="qbp_7fbdb7c2-c674-4bbd-ad67-d09e64e66a16" elementId="node_30ae0db5-8a82-4462-aae3-69d625b3e532">
+      <qbp:durationDistribution type="EXPONENTIAL" mean="0" arg1="1614.46" arg2="0">
+        <qbp:timeUnit>seconds</qbp:timeUnit>
+      </qbp:durationDistribution>
+      <qbp:resourceIds>
+        <qbp:resourceId>QBP_DEFAULT_RESOURCE</qbp:resourceId>
+      </qbp:resourceIds>
+    </qbp:element>
+    <qbp:element id="qbp_aee5061d-059d-4fea-bc4e-722afeda0277" elementId="node_24f963f6-f5f7-418e-9b7e-13ec8581ab86">
+      <qbp:durationDistribution type="EXPONENTIAL" mean="0" arg1="792.76" arg2="0">
+        <qbp:timeUnit>seconds</qbp:timeUnit>
+      </qbp:durationDistribution>
+      <qbp:resourceIds>
+        <qbp:resourceId>QBP_DEFAULT_RESOURCE</qbp:resourceId>
+      </qbp:resourceIds>
+    </qbp:element>
+    <qbp:element id="qbp_1fe8593d-0547-4a8f-be3b-8d17a8448622" elementId="node_c2e15d03-a671-4794-9a6d-589a436ce203">
+      <qbp:durationDistribution type="EXPONENTIAL" mean="0" arg1="257.84" arg2="0">
+        <qbp:timeUnit>seconds</qbp:timeUnit>
+      </qbp:durationDistribution>
+      <qbp:resourceIds>
+        <qbp:resourceId>QBP_DEFAULT_RESOURCE</qbp:resourceId>
+      </qbp:resourceIds>
+    </qbp:element>
+    <qbp:element id="qbp_39433430-0294-4c20-95b1-17a77388e4e6" elementId="node_7341e489-1b70-4d00-91c7-4800450ea863">
+      <qbp:durationDistribution type="EXPONENTIAL" mean="0" arg1="15002.71" arg2="0">
+        <qbp:timeUnit>seconds</qbp:timeUnit>
+      </qbp:durationDistribution>
+      <qbp:resourceIds>
+        <qbp:resourceId>QBP_DEFAULT_RESOURCE</qbp:resourceId>
+      </qbp:resourceIds>
+    </qbp:element>
+    <qbp:element id="qbp_9214eb50-6380-4cb0-8430-69681050ed6a" elementId="node_cb19b8f8-53ca-4920-97d1-409e307ba897">
+      <qbp:durationDistribution type="EXPONENTIAL" mean="0" arg1="83.95" arg2="0">
+        <qbp:timeUnit>seconds</qbp:timeUnit>
+      </qbp:durationDistribution>
+      <qbp:resourceIds>
+        <qbp:resourceId>QBP_DEFAULT_RESOURCE</qbp:resourceId>
+      </qbp:resourceIds>
+    </qbp:element>
+    <qbp:element id="qbp_2f3e4777-f87a-43a7-9ff3-5b17438e7469" elementId="node_378b2ecc-faae-4f50-8f96-0b9a6d01b0a2">
+      <qbp:durationDistribution type="EXPONENTIAL" mean="0" arg1="413.56" arg2="0">
+        <qbp:timeUnit>seconds</qbp:timeUnit>
+      </qbp:durationDistribution>
+      <qbp:resourceIds>
+        <qbp:resourceId>QBP_DEFAULT_RESOURCE</qbp:resourceId>
+      </qbp:resourceIds>
+    </qbp:element>
+    <qbp:element id="qbp_719b2041-b477-452a-b16b-e5b768e59d54" elementId="node_841a3bf0-4c55-475b-a0dc-484393b4795b">
+      <qbp:durationDistribution type="FIXED" mean="0" arg1="0" arg2="0">
+        <qbp:timeUnit>seconds</qbp:timeUnit>
+      </qbp:durationDistribution>
+      <qbp:resourceIds>
+        <qbp:resourceId>QBP_DEFAULT_RESOURCE</qbp:resourceId>
+      </qbp:resourceIds>
+    </qbp:element>
+    <qbp:element id="qbp_f079efc8-ab7f-468c-8e68-9246faff7ad7" elementId="node_145bc327-da03-4c9f-b8c4-d9744d040f1f">
+      <qbp:durationDistribution type="FIXED" mean="0" arg1="0" arg2="0">
+        <qbp:timeUnit>seconds</qbp:timeUnit>
+      </qbp:durationDistribution>
+      <qbp:resourceIds>
+        <qbp:resourceId>QBP_DEFAULT_RESOURCE</qbp:resourceId>
+      </qbp:resourceIds>
+    </qbp:element>
+  </qbp:elements>
+  <qbp:sequenceFlows>
+    <qbp:sequenceFlow elementId="node_59d36866-e2b9-4a5b-8b72-2841af524125" executionProbability="0.5"/>
+    <qbp:sequenceFlow elementId="node_6c6575fc-b066-4ead-b0a9-23c49a802698" executionProbability="0.5"/>
+    <qbp:sequenceFlow elementId="node_295466ee-f0ac-46e4-ab0a-14177fa2fb28" executionProbability="0.5"/>
+    <qbp:sequenceFlow elementId="node_b1f732ca-f378-4a71-9142-2543e5f7f050" executionProbability="0.5"/>
+  </qbp:sequenceFlows>
+</qbp:processSimulationInfo></definitions>
