@@ -7,7 +7,7 @@ RUN set -ex; \
 	apt-get -yq --no-install-recommends upgrade; \
 	apt-get install -yq --no-install-recommends git; \
 	apt-get install -yq --no-install-recommends tk; \
-	apt-get install -yq --no-install-recommends openjdk-8-jdk; \
+	apt-get install openjdk-8-jdk; \
 	pip install --upgrade pip
 
 WORKDIR /workspace
