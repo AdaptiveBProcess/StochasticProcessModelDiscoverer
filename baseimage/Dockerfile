@@ -7,7 +7,7 @@ RUN set -ex; \
 	apt-get -yq --no-install-recommends upgrade; \
 	apt-get install -yq --no-install-recommends git; \
 	apt-get install -yq --no-install-recommends tk; \
-	apt-get install -yq --no-install-recommends wget --continue --no-check-certificate --header "Cookie: oraclelicense=a" 'https://download.oracle.com/otn/java/jdk/8u371-b11/ce59cff5c23f4e2eaf4e778a117d4c5b/jdk-8u371-linux-aarch64.tar.gz'; \
+	apt-get install -yq --no-install-recommends wget 'https://download.oracle.com/otn/java/jdk/8u371-b11/ce59cff5c23f4e2eaf4e778a117d4c5b/jdk-8u371-linux-aarch64.tar.gz'; \
 	pip install --upgrade pip
 
 WORKDIR /workspace
