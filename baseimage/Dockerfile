@@ -9,7 +9,7 @@ RUN set -ex; \
     apt-get --no-install-recommends update; \
 	apt-get -yq --no-install-recommends upgrade; \
 	apt-get install -yq --no-install-recommends git; \
-	apt-get install -yq --no-install-recommends tk; \
+	apt-get install -yq --no-install-recommends python3-tk; \
 	apt-get install -yq --no-install-recommends software-properties-common; \
     apt-get install -y python3-pip; \
 	pip3 install --upgrade pip
