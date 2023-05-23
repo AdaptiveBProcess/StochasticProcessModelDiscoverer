@@ -22,7 +22,7 @@ pipeline {
                 ansiColor('xterm'){
                     script{
                         docker.build(
-                            "python:3.8-slim",
+                            "openjdk:8-jdk",
                             "--pull -f baseimage/Dockerfile ."
                         )
                     }
@@ -34,12 +34,12 @@ pipeline {
             steps {
                 ansiColor('xterm') {
                     script{
-                        docker.image("python:3.8-slim").inside(){
+                        docker.image("openjdk:8-jdk").inside(){
                             sh '''#!/usr/bin/env bash
                             pip install --user -r requirements.txt
                             pip install --user -r test/requirements.txt
                             export PYTHONPATH=test:src
-                            python -m pytest --cov-report=xml:coverage.xml --cov=src -vv test'''
+                            python3 -m pytest --cov-report=xml:coverage.xml --cov=src -vv test'''
                         }
                     }
                 }
