@@ -12,7 +12,7 @@ RUN set -ex; \
 	apt-get install -yq --no-install-recommends tk; \
 	apt-get install -yq --no-install-recommends software-properties-common; \
     add-apt-repository -y ppa:deadsnakes/ppa; \
-    apt-get install -y python3.8 python3-pip; \
+    apt-get install -y python3.7 python3-pip; \
 	pip install --upgrade pip
 
 WORKDIR /workspace
