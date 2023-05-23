@@ -1,4 +1,7 @@
-FROM python:3.8-slim
+FROM openjdk:8-jdk
+
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
+RUN export JAVA_HOME
 
 RUN set -ex; \
 	addgroup --system --gid 1002 jenkins; \
@@ -8,10 +11,7 @@ RUN set -ex; \
 	apt-get install -yq --no-install-recommends git; \
 	apt-get install -yq --no-install-recommends tk; \
 	apt-get install -yq --no-install-recommends software-properties-common; \
-	add-apt-repository -y ppa:openjdk-r/ppa; \
-    apt-get --no-install-recommends update; \
-    apt-get -yq --no-install-recommends upgrade; \
-	apt-get install -y openjdk-8-jdk; \
+    apt-get install -y python3.8 python3-pip; \
 	pip install --upgrade pip
 
 WORKDIR /workspace
