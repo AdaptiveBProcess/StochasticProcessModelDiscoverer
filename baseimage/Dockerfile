@@ -1,7 +1,8 @@
-FROM openjdk:8-jdk
+FROM ubuntu:20.04
 
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
-RUN export JAVA_HOME
+# Setup python and java and base system
+ENV DEBIAN_FRONTEND noninteractive
+ENV LANG=en_US.UTF-8
 
 RUN set -ex; \
 	addgroup --system --gid 1002 jenkins; \
@@ -10,7 +11,8 @@ RUN set -ex; \
 	apt-get -yq --no-install-recommends upgrade; \
 	apt-get install -yq --no-install-recommends git; \
 	apt-get install -yq --no-install-recommends python3.9-tk; \
-	apt-get install -yq --no-install-recommends software-properties-common; \
+    apt-get install -yq openjdk-8-jdk libsnappy-dev language-pack-en supervisor; \
+	apt-get install -yq --no-install-recommends software-properties-common; \	
     apt-get install -y python3-pip; \
 	pip3 install --upgrade pip
 
