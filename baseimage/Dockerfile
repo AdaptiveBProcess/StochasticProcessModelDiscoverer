@@ -3,6 +3,7 @@ FROM ubuntu:20.04
 # Setup python and java and base system
 ENV DEBIAN_FRONTEND noninteractive
 ENV LANG=en_US.UTF-8
+ENV DISPLAY :10
 
 RUN set -ex; \
 	addgroup --system --gid 1002 jenkins; \
