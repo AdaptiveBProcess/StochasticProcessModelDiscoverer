@@ -10,7 +10,7 @@ RUN set -ex; \
     apt-get --no-install-recommends update; \
 	apt-get -yq --no-install-recommends upgrade; \
 	apt-get install -yq --no-install-recommends git; \
-	apt-get install -yq --no-install-recommends python3.9-tk; \
+	apt-get install -yq --no-install-recommends python3.8-tk; \
     apt-get install -yq openjdk-8-jdk libsnappy-dev language-pack-en supervisor; \
 	apt-get install -yq --no-install-recommends software-properties-common; \	
     apt-get install -y python3-pip; \
