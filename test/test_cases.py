@@ -50,7 +50,7 @@ class TestLogReader(TestCase):
 
         # noinspection PyTypeChecker
         result = runner.invoke(main, ['discover', '--file', test_event_log, '--exp_reps', exp_reps, '--s_gen_max_eval',
-                                      s_gen_max_eval, '--mining_alg', 'sm2'])
+                                      s_gen_max_eval, '--mining_alg', 'sm3'])
 
         # then
         assert result.exit_code == 0
