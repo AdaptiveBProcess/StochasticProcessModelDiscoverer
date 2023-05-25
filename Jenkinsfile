@@ -32,7 +32,7 @@ pipeline {
 
 		stage('Run Tests'){
 			steps {
-				wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', displayNameOffset: 99, installationName: 'XvfbApp', screen: '0', timeout: 0]) {
+				wrap([$class: 'Xvfb', additionalOptions: '-displayfd', displayNameOffset: 1, installationName: 'XvfbApp', timeout: 0]) {
 					ansiColor('xterm') {
 						script{
 							docker.image("ubuntu:20.04").inside(){
