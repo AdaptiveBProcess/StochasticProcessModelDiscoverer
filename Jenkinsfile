@@ -31,8 +31,8 @@ pipeline {
         }
 
 		stage('Run Tests'){
-			wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', displayNameOffset: 0, installationName: 'XvfbApp', screen: '', timeout: 0]) {
-				steps {
+			steps {
+				wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', displayNameOffset: 0, installationName: 'XvfbApp', screen: '', timeout: 0]) {
 					ansiColor('xterm') {
 						script{
 							docker.image("openjdk:8-jdk").inside(){
