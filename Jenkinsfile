@@ -36,6 +36,7 @@ pipeline {
 					ansiColor('xterm') {
 						script{
 							docker.image("ubuntu:20.04").inside(){
+								sh 'export DISPLAY=:0'
 								sh '''#!/usr/bin/env bash
 								pip install --user -r requirements.txt
 								pip install --user -r test/requirements.txt
