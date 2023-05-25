@@ -30,8 +30,8 @@ pipeline {
             }
         }
 
-		wrap([$class: 'Xvfb']) {
-			stage('Run Tests'){
+		stage('Run Tests'){
+			wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', displayNameOffset: 0, installationName: 'XvfbApp', screen: '', timeout: 0]) {
 				steps {
 					ansiColor('xterm') {
 						script{
