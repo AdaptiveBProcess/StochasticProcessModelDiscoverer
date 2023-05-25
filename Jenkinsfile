@@ -30,21 +30,23 @@ pipeline {
             }
         }
 
-        stage('Run Tests'){
-            steps {
-                ansiColor('xterm') {
-                    script{
-                        docker.image("openjdk:8-jdk").inside(){
-                            sh '''#!/usr/bin/env bash
-                            pip install --user -r requirements.txt
-                            pip install --user -r test/requirements.txt
-                            export PYTHONPATH=test:src
-                            python3 -m pytest --cov-report=xml:coverage.xml --cov=src -vv test'''
-                        }
-                    }
-                }
-            }
-        }
+		wrap([$class: 'Xvfb') {
+			stage('Run Tests'){
+				steps {
+					ansiColor('xterm') {
+						script{
+							docker.image("openjdk:8-jdk").inside(){
+								sh '''#!/usr/bin/env bash
+								pip install --user -r requirements.txt
+								pip install --user -r test/requirements.txt
+								export PYTHONPATH=test:src
+								python3 -m pytest --cov-report=xml:coverage.xml --cov=src -vv test'''
+							}
+						}
+					}
+				}
+			}
+		}
 
         stage('PR SonarQube analysis') {
             when { changeRequest() }
