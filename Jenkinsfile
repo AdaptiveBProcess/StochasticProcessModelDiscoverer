@@ -19,14 +19,16 @@ pipeline {
     stages{
         stage('Build Test Image'){
             steps{
-                ansiColor('xterm'){
-                    script{
-                        docker.build(
-                            "openjdk:8-jdk",
-                            "--pull -f baseimage/Dockerfile ."
-                        )
-                    }
-                }
+				wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', displayNameOffset: 0, installationName: 'XvfbApp', screen: '', timeout: 0]) {
+					ansiColor('xterm'){
+						script{
+							docker.build(
+								"ubuntu:20.04",
+								"--pull -f baseimage/Dockerfile ."
+							)
+						}
+					}
+				}
             }
         }
 
@@ -35,7 +37,11 @@ pipeline {
 				wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', displayNameOffset: 0, installationName: 'XvfbApp', screen: '', timeout: 0]) {
 					ansiColor('xterm') {
 						script{
-							docker.image("openjdk:8-jdk").inside(){
+							docker.image("ubuntu:20.04").inside(){
+							    // Start Xvfb
+								sh 'Xvfb :99 -screen 0 1024x768x24 &'
+								sh 'export DISPLAY=:99'
+
 								sh '''#!/usr/bin/env bash
 								pip install --user -r requirements.txt
 								pip install --user -r test/requirements.txt
