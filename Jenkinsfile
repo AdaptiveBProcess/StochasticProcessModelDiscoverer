@@ -30,7 +30,7 @@ pipeline {
             }
         }
 
-		wrap([$class: 'Xvfb') {
+		wrap([$class: 'Xvfb']) {
 			stage('Run Tests'){
 				steps {
 					ansiColor('xterm') {
