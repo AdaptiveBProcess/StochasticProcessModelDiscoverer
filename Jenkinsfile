@@ -32,13 +32,13 @@ pipeline {
 
 		stage('Run Tests'){
 			steps {
-				wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', displayNameOffset: 99, installationName: 'XvfbApp', screen: '0', timeout: 0]) {
+				wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', displayNameOffset: 98, installationName: 'XvfbApp', screen: '0', timeout: 0]) {
 					ansiColor('xterm') {
 						script{
 							docker.image("ubuntu:20.04").inside(){
 							    // Start Xvfb
-								sh 'Xvfb :99 -screen 0 1024x768x24 &'
-								sh 'export DISPLAY=:99'
+								sh 'Xvfb :98 -screen 0 1024x768x24 &'
+								sh 'export DISPLAY=:98'
 
 								sh '''#!/usr/bin/env bash
 								pip install --user -r requirements.txt
