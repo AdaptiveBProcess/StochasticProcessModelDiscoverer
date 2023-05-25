@@ -19,22 +19,20 @@ pipeline {
     stages{
         stage('Build Test Image'){
             steps{
-				wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', displayNameOffset: 0, installationName: 'XvfbApp', screen: '', timeout: 0]) {
-					ansiColor('xterm'){
-						script{
-							docker.build(
-								"ubuntu:20.04",
-								"--pull -f baseimage/Dockerfile ."
-							)
-						}
+				ansiColor('xterm'){
+					script{
+						docker.build(
+							"ubuntu:20.04",
+							"--pull -f baseimage/Dockerfile ."
+						)
 					}
-				}
+				}			
             }
         }
 
 		stage('Run Tests'){
 			steps {
-				wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', displayNameOffset: 0, installationName: 'XvfbApp', screen: '', timeout: 0]) {
+				wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', displayNameOffset: 99, installationName: 'XvfbApp', screen: '0', timeout: 0]) {
 					ansiColor('xterm') {
 						script{
 							docker.image("ubuntu:20.04").inside(){
